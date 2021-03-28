@@ -1,0 +1,7 @@
+WTF a = 10
+WTF b = 20
+
+eww a + b
+eww a - b
+eww a * b
+eww a / b

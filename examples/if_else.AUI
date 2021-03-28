@@ -1,0 +1,9 @@
+WTF a = 10
+
+agar a == 10 {
+	eww "a is 10!"
+}
+
+nahi toh {
+	eww "a is not 10!"
+}
