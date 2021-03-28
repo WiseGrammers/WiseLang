@@ -157,7 +157,7 @@ class BasicExecute:
 if __name__ == '__main__':
 	lexer = BasicLexer()
 	parser = BasicParser()
-	print('WiseLang Compiler')
+	print('WiseLang v0.1 lawda:')
 	env = {}
 	
 	while True:
