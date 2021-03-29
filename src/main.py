@@ -4,7 +4,7 @@ from sly import Parser
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT }
+	tokens = { NAAM, NUMBER, STRING, PRINT}
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
 				'*', '(', ')', ',', ';'}
@@ -15,7 +15,6 @@ class BasicLexer(Lexer):
 	NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
 	NAAM["eww"] = PRINT
-	NAAM["input"] = INPUT
   
 	# Number token
 	@_(r'\d+')
@@ -24,13 +23,6 @@ class BasicLexer(Lexer):
 		# convert it into a python integer
 		t.value = int(t.value) 
 		return t
-
-	#remove quotes
-	def remove_quotes(self, text: str):
-		if text.startswith('\"') or text.startswith('\''):
-			return text[1:-1]
-		else:
-			pass
 
 	# Comment token
 	@_(r'//.*')
@@ -58,7 +50,7 @@ class BasicParser(Parser):
 		('left', '+', '-'),
 		('left', '*', '/'),
 		('right', 'UMINUS'),
-		('left', PRINT, INPUT)
+		('left', PRINT)
 	)
 
 	def __init__(self):
@@ -106,6 +98,7 @@ class BasicParser(Parser):
 
 	@_('"-" expr %prec UMINUS')
 	def expr(self, p):
+		print(dir(p))
 		return p.expr
 
 	@_('NAAM')
@@ -119,11 +112,6 @@ class BasicParser(Parser):
 	@_('PRINT statement')
 	def statement(self, p):
 		return ('print', p.statement)
-
-	@_('INPUT statement')
-	def statement(self, p):
-		return ('input', p.statement)
-
 # Parser Class End
 
 # Execution Class Start
@@ -132,16 +120,14 @@ class BasicExecute:
 	def __init__(self, tree, env):
 		self.env = env
 		result = self.walkTree(tree)
-		if result is not None and isinstance(result, int):
+		if isinstance(result, int) :
 			print(result)
-		if isinstance(result, str) and result[0] == '"':
-			print(result)
+		elif isinstance(result, str):
+			print(result[1:-1])
 
 	def walkTree(self, node):
 
-		if isinstance(node, int):
-			return node
-		if isinstance(node, str):
+		if isinstance(node, int) or isinstance(node, str):
 			return node
 
 		if node is None:
@@ -190,15 +176,14 @@ VERSION = "v0.1 Lawda"
 if __name__ == '__main__':
 	lexer = BasicLexer()
 	parser = BasicParser()
-	print(f'WiseLang {VERSION}:')
 	env = {}
-	
+
 	while True:
 		
 		try:
-			text = input('WiseLang > ')
+			text = input(f'WiseLang: {VERSION}> ')
 		
-		except EOFError:
+		except (EOFError, KeyboardInterrupt):
 			break
 		
 		if text:
