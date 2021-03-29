@@ -4,49 +4,49 @@ from sly import Parser
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-    tokens = { NAAM, NUMBER, STRING, PRINT, INPUT }
-    ignore = '\t '
-    literals = { '=', '+', '-', '/', 
-                '*', '(', ')', ',', ';'}
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT }
+	ignore = '\t '
+	literals = { '=', '+', '-', '/', 
+				'*', '(', ')', ',', ';'}
   
   
-    # Define tokens as regular expressions
-    # (stored as raw strings)
-    NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
-    STRING = r'\".*?\"'
-    NAAM["eww"] = PRINT
-    NAAM["input"] = INPUT
+	# Define tokens as regular expressions
+	# (stored as raw strings)
+	NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
+	STRING = r'\".*?\"'
+	NAAM["eww"] = PRINT
+	NAAM["input"] = INPUT
   
-    # Number token
-    @_(r'\d+')
-    def NUMBER(self, t):
-        
-        # convert it into a python integer
-        t.value = int(t.value) 
-        return t
+	# Number token
+	@_(r'\d+')
+	def NUMBER(self, t):
+		
+		# convert it into a python integer
+		t.value = int(t.value) 
+		return t
 
-    #remove quotes
-    def remove_quotes(self, text: str):
-        if text.startswith('\"') or text.startswith('\''):
-            return text[1:-1]
-        else:
-        	pass
+	#remove quotes
+	def remove_quotes(self, text: str):
+		if text.startswith('\"') or text.startswith('\''):
+			return text[1:-1]
+		else:
+			pass
 
-    # Comment token
-    @_(r'//.*')
-    def COMMENT(self, t):
-        pass
+	# Comment token
+	@_(r'//.*')
+	def COMMENT(self, t):
+		pass
   
-    # Newline token(used only for showing
-    # errors in new line)
-    @_(r'\n+')
-    def NEWLINE(self, t):
-        self.lineno = t.value.count('\n')
+	# Newline token(used only for showing
+	# errors in new line)
+	@_(r'\n+')
+	def NEWLINE(self, t):
+		self.lineno = t.value.count('\n')
 
-    # error handling.....?
-    def error(self, t):
-        print("Illegal character '%s'" % t.value[0])
-        self.index += 1
+	# error handling.....?
+	def error(self, t):
+		print("Illegal character '%s'" % t.value[0])
+		self.index += 1
 # Lexer Class End
 
 # Parser Class Start
@@ -83,6 +83,10 @@ class BasicParser(Parser):
 	@_('expr')
 	def statement(self, p):
 		return (p.expr)
+
+	@_('STRING')
+	def statement(self, p):
+		return (p.STRING)
 
 	@_('expr "+" expr')
 	def expr(self, p):

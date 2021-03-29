@@ -3,6 +3,14 @@ A Wise language, for wise members of AUI
 
 we've created this lannguage for out beloved AUIians to learn how to code and become the next chintu!
 
+## Requirements
+
+this language uses sly for parsing and lexical analysis
+
+```
+pip install -r requirements.txt
+```
+
 ## Examples:
 ```
 // this is a comment
