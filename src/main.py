@@ -96,6 +96,7 @@ class BasicParser(Parser):
 	def expr(self, p):
 		return ('div', p.expr0, p.expr1)
 
+	# tf is this?
 	@_('"-" expr %prec UMINUS')
 	def expr(self, p):
 		print(dir(p))
@@ -156,6 +157,8 @@ class BasicExecute:
 			return self.walkTree(node[1]) / self.walkTree(node[2])
 		elif node[0] == 'print':
 			return self.walkTree(node[1])
+		# elif node[0] == 'output':
+		# 	return self.walkTree(node)
 
 		if node[0] == 'var_assign':
 			self.env[node[1]] = self.walkTree(node[2])
