@@ -4,7 +4,7 @@ from sly import Parser
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-    tokens = { NAAM, NUMBER, STRING }
+    tokens = { NAAM, NUMBER, STRING, PRINT, INPUT }
     ignore = '\t '
     literals = { '=', '+', '-', '/', 
                 '*', '(', ')', ',', ';'}
@@ -14,6 +14,8 @@ class BasicLexer(Lexer):
     # (stored as raw strings)
     NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
     STRING = r'\".*?\"'
+    NAAM["eww"] = PRINT
+    NAAM["input"] = INPUT
   
     # Number token
     @_(r'\d+')
@@ -22,7 +24,14 @@ class BasicLexer(Lexer):
         # convert it into a python integer
         t.value = int(t.value) 
         return t
-  
+
+    #remove quotes
+    def remove_quotes(self, text: str):
+        if text.startswith('\"') or text.startswith('\''):
+            return text[1:-1]
+        else:
+        	pass
+
     # Comment token
     @_(r'//.*')
     def COMMENT(self, t):
@@ -33,6 +42,11 @@ class BasicLexer(Lexer):
     @_(r'\n+')
     def NEWLINE(self, t):
         self.lineno = t.value.count('\n')
+
+    # error handling.....?
+    def error(self, t):
+        print("Illegal character '%s'" % t.value[0])
+        self.index += 1
 # Lexer Class End
 
 # Parser Class Start
@@ -44,6 +58,7 @@ class BasicParser(Parser):
 		('left', '+', '-'),
 		('left', '*', '/'),
 		('right', 'UMINUS'),
+		('left', PRINT, INPUT)
 	)
 
 	def __init__(self):
@@ -96,6 +111,15 @@ class BasicParser(Parser):
 	@_('NUMBER')
 	def expr(self, p):
 		return ('num', p.NUMBER)
+
+	@_('PRINT statement')
+	def statement(self, p):
+		return ('print', p.statement)
+
+	@_('INPUT statement')
+	def statement(self, p):
+		return ('input', p.statement)
+
 # Parser Class End
 
 # Execution Class Start
@@ -140,6 +164,8 @@ class BasicExecute:
 			return self.walkTree(node[1]) * self.walkTree(node[2])
 		elif node[0] == 'div':
 			return self.walkTree(node[1]) / self.walkTree(node[2])
+		elif node[0] == 'print':
+			return self.walkTree(node[1])
 
 		if node[0] == 'var_assign':
 			self.env[node[1]] = self.walkTree(node[2])
@@ -154,10 +180,13 @@ class BasicExecute:
 # Execution Class End
 
 # Execution Start
+
+VERSION = "v0.1 Lawda"
+
 if __name__ == '__main__':
 	lexer = BasicLexer()
 	parser = BasicParser()
-	print('WiseLang v0.1 lawda:')
+	print(f'WiseLang {VERSION}:')
 	env = {}
 	
 	while True:
