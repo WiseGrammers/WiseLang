@@ -4,11 +4,7 @@ from sly import Parser
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-<<<<<<< HEAD
 	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK }
-=======
-	tokens = { NAAM, NUMBER, STRING, PRINT}
->>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
 				'*', '(', ')', ',', ';'}
@@ -18,7 +14,6 @@ class BasicLexer(Lexer):
 	NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
 	NAAM["eww"] = PRINT
-<<<<<<< HEAD
 	NAAM["input"] = INPUT
 	NAAM["chutiya"] = PASS
 	NAAM["agar"] = IF
@@ -26,9 +21,6 @@ class BasicLexer(Lexer):
 	NAAM["nahi toh"] = ELSE
 	NAAM["hatt"] = BREAK
 
-=======
-  
->>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 	# Number token
 	@_(r'\d+')
 	def NUMBER(self, t):
@@ -63,11 +55,7 @@ class BasicParser(Parser):
 		('left', '+', '-'),
 		('left', '*', '/'),
 		('right', 'UMINUS'),
-<<<<<<< HEAD
 		('left', PRINT, INPUT),
-=======
-		('left', PRINT)
->>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 	)
 
 	# remove quotes = text[1:-1]
@@ -133,7 +121,6 @@ class BasicParser(Parser):
 	@_('PRINT statement')
 	def statement(self, p):
 		return ('print', p.statement)
-<<<<<<< HEAD
 
 	@_('NAAM "=" INPUT statement')
 	def statement(self, p):
@@ -147,12 +134,15 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return ('break')
 
-=======
->>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 # Parser Class End
 
 # Execution Class Start
 class BasicExecute:
+
+	def remove_quotes(self, text: str):
+		if text.startswith('\"') or text.startswith('\''):
+			return text[1:-1]
+		return text
 	
 	def __init__(self, tree, env):
 		self.env = env
@@ -160,17 +150,16 @@ class BasicExecute:
 		if isinstance(result, int) :
 			print(result)
 		elif isinstance(result, str):
-			print(result[1:-1])
+			print(self.remove_quotes(result))
 
 	def walkTree(self, node):
-
-<<<<<<< HEAD
 		if isinstance(node, int):
 			return node
+
 		elif isinstance(node, str):
-=======
+			return node
+
 		if isinstance(node, int) or isinstance(node, str):
->>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 			return node
 
 		elif node is None:
@@ -205,13 +194,11 @@ class BasicExecute:
 			return self.walkTree(node[1])
 
 		elif node[0] == 'input':
-			input_result = input(node[2])
+			input_result = input(node[2] + "\n")
 			self.env[node[1]] = input_result
-			return node[1]
 
 		elif node[0] == 'var_assign':
 			self.env[node[1]] = self.walkTree(node[2])
-			return node[1]
 
 		elif node[0] == 'var':
 			try:
@@ -232,11 +219,12 @@ if __name__ == '__main__':
 	lexer = BasicLexer()
 	parser = BasicParser()
 	env = {}
+	print(f"WiseLang {VERSION}:")
 
 	while True:
 		
 		try:
-			text = input(f'WiseLang: {VERSION}> ')
+			text = input(f'WiseLang > ')
 		
 		except (EOFError, KeyboardInterrupt):
 			break
