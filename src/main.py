@@ -4,19 +4,23 @@ from sly import Parser
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT }
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK }
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
 				'*', '(', ')', ',', ';'}
-  
-  
+
 	# Define tokens as regular expressions
 	# (stored as raw strings)
 	NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
 	NAAM["eww"] = PRINT
 	NAAM["input"] = INPUT
-  
+	NAAM["chutiya"] = PASS
+	NAAM["agar"] = IF
+	NAAM["agar yeh"] = ELIF
+	NAAM["nahi toh"] = ELSE
+	NAAM["hatt"] = BREAK
+
 	# Number token
 	@_(r'\d+')
 	def NUMBER(self, t):
@@ -25,18 +29,11 @@ class BasicLexer(Lexer):
 		t.value = int(t.value) 
 		return t
 
-	#remove quotes
-	def remove_quotes(self, text: str):
-		if text.startswith('\"') or text.startswith('\''):
-			return text[1:-1]
-		else:
-			pass
-
 	# Comment token
 	@_(r'//.*')
 	def COMMENT(self, t):
 		pass
-  
+
 	# Newline token(used only for showing
 	# errors in new line)
 	@_(r'\n+')
@@ -58,8 +55,10 @@ class BasicParser(Parser):
 		('left', '+', '-'),
 		('left', '*', '/'),
 		('right', 'UMINUS'),
-		('left', PRINT, INPUT)
+		('left', PRINT, INPUT),
 	)
+
+	# remove quotes = text[1:-1]
 
 	def __init__(self):
 		self.env = { }
@@ -86,7 +85,8 @@ class BasicParser(Parser):
 
 	@_('STRING')
 	def statement(self, p):
-		return (p.STRING)
+		final = p.STRING
+		return final
 
 	@_('expr "+" expr')
 	def expr(self, p):
@@ -121,9 +121,17 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return ('print', p.statement)
 
-	@_('INPUT statement')
+	@_('NAAM "=" INPUT statement')
 	def statement(self, p):
-		return ('input', p.statement)
+		return ('input', p.NAAM, p.statement)
+
+	@_('PASS')
+	def statement(self, p):
+		pass
+
+	@_('BREAK')
+	def statement(self, p):
+		return ('break')
 
 # Parser Class End
 
@@ -142,48 +150,58 @@ class BasicExecute:
 
 		if isinstance(node, int):
 			return node
-		if isinstance(node, str):
+		elif isinstance(node, str):
 			return node
 
-		if node is None:
+		elif node is None:
 			return None
 
-		if node[0] == 'program':
+		elif node[0] == 'program':
 			if node[1] == None:
 				self.walkTree(node[2])
 			else:
 				self.walkTree(node[1])
 				self.walkTree(node[2])
 
-		if node[0] == 'num':
+		elif node[0] == 'num':
 			return node[1]
 
-		if node[0] == 'str':
+		elif node[0] == 'str':
 			return node[1]
 
-		if node[0] == 'add':
+		elif node[0] == 'add':
 			return self.walkTree(node[1]) + self.walkTree(node[2])
+
 		elif node[0] == 'sub':
 			return self.walkTree(node[1]) - self.walkTree(node[2])
+
 		elif node[0] == 'mul':
 			return self.walkTree(node[1]) * self.walkTree(node[2])
+
 		elif node[0] == 'div':
 			return self.walkTree(node[1]) / self.walkTree(node[2])
+
 		elif node[0] == 'print':
 			return self.walkTree(node[1])
-		# elif node[0] == 'output':
-		# 	return self.walkTree(node)
 
-		if node[0] == 'var_assign':
+		elif node[0] == 'input':
+			input_result = input(node[2])
+			self.env[node[1]] = input_result
+			return node[1]
+
+		elif node[0] == 'var_assign':
 			self.env[node[1]] = self.walkTree(node[2])
 			return node[1]
 
-		if node[0] == 'var':
+		elif node[0] == 'var':
 			try:
 				return self.env[node[1]]
 			except LookupError:
 				print("Undefined variable '"+node[1]+"' found!")
 				return 0
+
+		elif node[0] == 'break':
+			raise SystemExit
 # Execution Class End
 
 # Execution Start
