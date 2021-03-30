@@ -4,7 +4,11 @@ from sly import Parser
 
 # Lexer Class Start
 class BasicLexer(Lexer):
+<<<<<<< HEAD
 	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK }
+=======
+	tokens = { NAAM, NUMBER, STRING, PRINT}
+>>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
 				'*', '(', ')', ',', ';'}
@@ -14,6 +18,7 @@ class BasicLexer(Lexer):
 	NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
 	NAAM["eww"] = PRINT
+<<<<<<< HEAD
 	NAAM["input"] = INPUT
 	NAAM["chutiya"] = PASS
 	NAAM["agar"] = IF
@@ -21,6 +26,9 @@ class BasicLexer(Lexer):
 	NAAM["nahi toh"] = ELSE
 	NAAM["hatt"] = BREAK
 
+=======
+  
+>>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 	# Number token
 	@_(r'\d+')
 	def NUMBER(self, t):
@@ -55,7 +63,11 @@ class BasicParser(Parser):
 		('left', '+', '-'),
 		('left', '*', '/'),
 		('right', 'UMINUS'),
+<<<<<<< HEAD
 		('left', PRINT, INPUT),
+=======
+		('left', PRINT)
+>>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 	)
 
 	# remove quotes = text[1:-1]
@@ -107,6 +119,7 @@ class BasicParser(Parser):
 	# tf is this?
 	@_('"-" expr %prec UMINUS')
 	def expr(self, p):
+		print(dir(p))
 		return p.expr
 
 	@_('NAAM')
@@ -120,6 +133,7 @@ class BasicParser(Parser):
 	@_('PRINT statement')
 	def statement(self, p):
 		return ('print', p.statement)
+<<<<<<< HEAD
 
 	@_('NAAM "=" INPUT statement')
 	def statement(self, p):
@@ -133,6 +147,8 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return ('break')
 
+=======
+>>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 # Parser Class End
 
 # Execution Class Start
@@ -141,16 +157,20 @@ class BasicExecute:
 	def __init__(self, tree, env):
 		self.env = env
 		result = self.walkTree(tree)
-		if result is not None and isinstance(result, int):
+		if isinstance(result, int) :
 			print(result)
-		if isinstance(result, str) and result[0] == '"':
-			print(result)
+		elif isinstance(result, str):
+			print(result[1:-1])
 
 	def walkTree(self, node):
 
+<<<<<<< HEAD
 		if isinstance(node, int):
 			return node
 		elif isinstance(node, str):
+=======
+		if isinstance(node, int) or isinstance(node, str):
+>>>>>>> 44e79b22f0aeea23d29ca38c4b02aa4814ff6dbe
 			return node
 
 		elif node is None:
@@ -211,15 +231,14 @@ VERSION = "v0.1 Lawda"
 if __name__ == '__main__':
 	lexer = BasicLexer()
 	parser = BasicParser()
-	print(f'WiseLang {VERSION}:')
 	env = {}
-	
+
 	while True:
 		
 		try:
-			text = input('WiseLang > ')
+			text = input(f'WiseLang: {VERSION}> ')
 		
-		except EOFError:
+		except (EOFError, KeyboardInterrupt):
 			break
 		
 		if text:
