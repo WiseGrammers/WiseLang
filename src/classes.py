@@ -134,15 +134,17 @@ class BasicParser(Parser):
 # Execution Class Start
 class BasicExecute:
 
-	def __init__(self, tree, env):
+	def __init__(self, tree, env, config):
 		self.env = env
+		self.conf = config
 		result = self.walkTree(tree)
 		if isinstance(result, int) or isinstance(result, str):
 			print(result)
 
 	def walkTree(self, node):
 
-		print(node)
+		if self.conf["DEBUG"] == True:
+			print(node)
 
 		if isinstance(node, int) or isinstance(node, str):
 			return node
@@ -181,31 +183,7 @@ class BasicExecute:
 
 		if node[0] == 'var':
 			try:
-				print(self.env)
 				return self.env[node[1]]
 			except LookupError:
 				print("Undefined variable '"+node[1]+"' found!")
 # Execution Class End
-
-# Execution Start
-
-VERSION = "v0.1 Lawda"
-
-if __name__ == '__main__':
-	lexer = BasicLexer()
-	parser = BasicParser()
-	print(f'WiseLang {VERSION}:')
-	env = {}
-	
-	while True:
-		
-		try:
-			text = input('WiseLang > ')
-		
-		except (EOFError, KeyboardInterrupt):
-			break
-		
-		if text:
-			tree = parser.parse(lexer.tokenize(text))
-			BasicExecute(tree, env)
-# Execution End

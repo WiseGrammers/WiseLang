@@ -12,6 +12,7 @@ pip install -r requirements.txt
 ```
 
 ## Examples:
+
 ```
 // this is a comment
 
@@ -27,4 +28,20 @@ agar a == 10 { // if statement
 nahi toh {  // else statement
   chutiya // pass
 }
+```
+
+## Running the program
+
+you this to run wiselang interpreter in normal mode
+```
+python src
+```
+
+### Debug Mode
+
+you can turn on debug mode with '-d' switch
+(even though it is useless for end users for me its very useful)
+
+```
+python src -d
 ```
