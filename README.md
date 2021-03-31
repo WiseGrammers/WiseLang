@@ -1,7 +1,7 @@
 # WiseLang
 A Wise language, for wise members of AUI
 
-we've created this lannguage for out beloved AUIians to learn how to code and become the next chintu!
+we've created this lannguage for our beloved AUIians to learn how to code and become the next chintu!
 
 ## Requirements
 
@@ -12,6 +12,7 @@ pip install -r requirements.txt
 ```
 
 ## Examples:
+
 ```
 // this is a comment
 
@@ -27,4 +28,20 @@ agar a == 10 { // if statement
 nahi toh {  // else statement
   chutiya // pass
 }
+```
+
+## Running the program
+
+use this to run wiselang interpreter in normal mode
+```
+python src
+```
+
+### Debug Mode
+
+you can turn on debug mode with '-d' switch
+(even though it is useless for end users for me its very useful)
+
+```
+python src -d
 ```
