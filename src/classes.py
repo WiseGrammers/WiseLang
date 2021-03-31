@@ -5,8 +5,10 @@ import ast
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT }
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK }
 	ignore = '\t '
+	literals = { '=', '+', '-', '/', 
+				'*', '(', ')', ',', ';'}
 	literals = { '=', '+', '-', '/', '*', '%'
 			'(', ')', ',', ';'}
 
@@ -16,6 +18,11 @@ class BasicLexer(Lexer):
 	STRING = r'\".*?\"'
 	NAAM["eww"] = PRINT
 	NAAM["input"] = INPUT
+	NAAM["chutiya"] = PASS
+	NAAM["agar"] = IF
+	NAAM["agar yeh"] = ELIF
+	NAAM["nahi toh"] = ELSE
+	NAAM["hatt"] = BREAK
 
 	# Number token
 	@_(r'\d+')
@@ -51,7 +58,6 @@ class BasicLexer(Lexer):
 
 # Parser Class Start
 class BasicParser(Parser):
-	#tokens are passed from lexer to parser
 	tokens = BasicLexer.tokens
 
 	precedence = (
@@ -103,6 +109,7 @@ class BasicParser(Parser):
 	# tf is this?
 	@_('"-" expr %prec UMINUS')
 	def expr(self, p):
+		print(dir(p))
 		return p.expr
 
 	@_('NAAM')
@@ -126,14 +133,39 @@ class BasicParser(Parser):
 # Execution Class Start
 class BasicExecute:
 
+	def remove_quotes(self, text: str):
+		if text.startswith('\"') or text.startswith('\''):
+			return text[1:-1]
+		return text
+
 	def __init__(self, tree, env, config):
 		self.env = env
 		self.conf = config
 		result = self.walkTree(tree)
+		if isinstance(result, int):
+			print(result)
+
+		if isinstance(result, int) or isinstance(result, str):
+			print(result)
+
 		if result is not None and (isinstance(result, int) or isinstance(result, str)):
 			print(repr(result))
 
+		elif isinstance(result, str):
+			print(self.remove_quotes(result))
+
 	def walkTree(self, node):
+		if isinstance(node, int):
+			return node
+
+		elif isinstance(node, str):
+			return node
+
+		if isinstance(node, int) or isinstance(node, str):
+			return node
+
+		elif node is None:
+			return None
 
 		if self.conf["DEBUG"] == True:
 			print("[DEBUG]:", repr(node))
@@ -159,13 +191,24 @@ class BasicExecute:
 
 		elif node[0] == 'add':
 			return self.walkTree(node[1]) + self.walkTree(node[2])
+
 		elif node[0] == 'sub':
 			return self.walkTree(node[1]) - self.walkTree(node[2])
+
 		elif node[0] == 'mul':
 			return self.walkTree(node[1]) * self.walkTree(node[2])
+
 		elif node[0] == 'div':
 			return self.walkTree(node[1]) / self.walkTree(node[2])
+
 		elif node[0] == 'print':
+			return self.walkTree(node[1])
+
+		elif node[0] == 'input':
+			input_result = input(node[2] + "\n")
+			self.env[node[1]] = input_result
+			return f"\"{input()}\""
+
 			print(self.walkTree(node[1]))
 		elif node[0] == 'input':
 			optstr = self.walkTree(node[1])
@@ -181,4 +224,8 @@ class BasicExecute:
 				return self.env[node[1]]
 			except LookupError:
 				print("Undefined variable '"+node[1]+"' found!")
+				return 0
+
+		elif node[0] == 'break':
+			raise SystemExit
 # Execution Class End
