@@ -4,18 +4,22 @@ from sly import Parser
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT }
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK }
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
 				'*', '(', ')', ',', ';'}
-  
-  
+
 	# Define tokens as regular expressions
 	# (stored as raw strings)
 	NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
 	NAAM["eww"] = PRINT
 	NAAM["input"] = INPUT
+	NAAM["chutiya"] = PASS
+	NAAM["agar"] = IF
+	NAAM["agar yeh"] = ELIF
+	NAAM["nahi toh"] = ELSE
+	NAAM["hatt"] = BREAK
   
 	# Number token
 	@_(r'\d+')
@@ -51,7 +55,6 @@ class BasicLexer(Lexer):
 
 # Parser Class Start
 class BasicParser(Parser):
-	#tokens are passed from lexer to parser
 	tokens = BasicLexer.tokens
 
 	precedence = (
@@ -71,14 +74,6 @@ class BasicParser(Parser):
 	@_('var_assign')
 	def statement(self, p):
 		return p.var_assign
-
-# 	@_('NAAM "=" expr')
-# 	def var_assign(self, p):
-# 		return ('var_assign', p.NAAM, p.expr)
-
-# 	@_('NAAM "=" STRING')
-# 	def var_assign(self, p):
-# 		return ('var_assign', p.NAAM, p.STRING)
 
 	@_('NAAM "=" statement')
 	def var_assign(self, p):
@@ -135,30 +130,25 @@ class BasicParser(Parser):
 # Execution Class Start
 class BasicExecute:
 
-<<<<<<< HEAD:src/main.py
 	def remove_quotes(self, text: str):
 		if text.startswith('\"') or text.startswith('\''):
 			return text[1:-1]
 		return text
-	
-	def __init__(self, tree, env):
-=======
+
 	def __init__(self, tree, env, config):
->>>>>>> 943c00cc42a8e5627bcc7be29403ddc928fa5122:src/classes.py
 		self.env = env
 		self.conf = config
 		result = self.walkTree(tree)
-<<<<<<< HEAD:src/main.py
-		if isinstance(result, int) :
-=======
-		if isinstance(result, int) or isinstance(result, str):
->>>>>>> 943c00cc42a8e5627bcc7be29403ddc928fa5122:src/classes.py
+		if isinstance(result, int):
 			print(result)
+
+		if isinstance(result, int) or isinstance(result, str):
+			print(result)
+
 		elif isinstance(result, str):
 			print(self.remove_quotes(result))
 
 	def walkTree(self, node):
-<<<<<<< HEAD:src/main.py
 		if isinstance(node, int):
 			return node
 
@@ -169,7 +159,7 @@ class BasicExecute:
 			return node
 
 		elif node is None:
-=======
+			return None
 
 		if self.conf["DEBUG"] == True:
 			print(node)
@@ -178,7 +168,6 @@ class BasicExecute:
 			return node
 
 		if node is None:
->>>>>>> 943c00cc42a8e5627bcc7be29403ddc928fa5122:src/classes.py
 			return None
 
 		if node[0] == 'program':
@@ -196,21 +185,23 @@ class BasicExecute:
 
 		if node[0] == 'add':
 			return self.walkTree(node[1]) + self.walkTree(node[2])
+
 		elif node[0] == 'sub':
 			return self.walkTree(node[1]) - self.walkTree(node[2])
+
 		elif node[0] == 'mul':
 			return self.walkTree(node[1]) * self.walkTree(node[2])
+
 		elif node[0] == 'div':
 			return self.walkTree(node[1]) / self.walkTree(node[2])
+
 		elif node[0] == 'print':
 			return self.walkTree(node[1])
+
 		elif node[0] == 'input':
-<<<<<<< HEAD:src/main.py
 			input_result = input(node[2] + "\n")
 			self.env[node[1]] = input_result
-=======
 			return f"\"{input()}\""
->>>>>>> 943c00cc42a8e5627bcc7be29403ddc928fa5122:src/classes.py
 
 		if node[0] == 'var_assign':
 			self.env[node[1]] = self.walkTree(node[2])
@@ -220,35 +211,8 @@ class BasicExecute:
 				return self.env[node[1]]
 			except LookupError:
 				print("Undefined variable '"+node[1]+"' found!")
-<<<<<<< HEAD:src/main.py
 				return 0
 
 		elif node[0] == 'break':
 			raise SystemExit
 # Execution Class End
-
-# Execution Start
-
-VERSION = "v0.1 Lawda"
-
-if __name__ == '__main__':
-	lexer = BasicLexer()
-	parser = BasicParser()
-	env = {}
-	print(f"WiseLang {VERSION}:")
-
-	while True:
-		
-		try:
-			text = input(f'WiseLang > ')
-		
-		except (EOFError, KeyboardInterrupt):
-			break
-		
-		if text:
-			tree = parser.parse(lexer.tokenize(text))
-			BasicExecute(tree, env)
-# Execution End
-=======
-# Execution Class End
->>>>>>> 943c00cc42a8e5627bcc7be29403ddc928fa5122:src/classes.py
