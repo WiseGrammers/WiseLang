@@ -5,10 +5,10 @@ import ast
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC }
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC, WTF }
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
-				'*', '(', ')', ',', ';', '%', '==', '!='}
+				'*', '%', '(', ')', ',', ';', '%', '==', '!='}
 
 	# Define tokens as regular expressions
 	# (stored as raw strings)
@@ -21,6 +21,7 @@ class BasicLexer(Lexer):
 	NAAM["agar yeh"] = ELIF
 	NAAM["nahi toh"] = ELSE
 	NAAM["hatt"] = BREAK
+	NAAM["WTF"] = WTF
 
 	# Operators
 	LBRAC = r'\{'
@@ -64,6 +65,7 @@ class BasicParser(Parser):
 	precedence = (
 		('left', '+', '-'),
 		('left', '*', '/'),
+		('left', '%'),
 		('right', 'UMINUS'),
 		('left', PRINT, INPUT)
 	)
@@ -79,7 +81,7 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return p.var_assign
 
-	@_('NAAM "=" statement')
+	@_('WTF NAAM "=" statement')
 	def var_assign(self, p):
 		return ('var_assign', p.NAAM, p.statement)
 
@@ -106,6 +108,10 @@ class BasicParser(Parser):
 	@_('expr "/" expr')
 	def expr(self, p):
 		return ('div', p.expr0, p.expr1)
+
+	@_('expr "%" expr')
+	def expr(self, p):
+		return ('mod', p.expr0, p.expr1)
 
 	# tf is this?
 	@_('"-" expr %prec UMINUS')
@@ -188,6 +194,9 @@ class BasicExecute:
 		elif node[0] == 'div':
 			return self.walkTree(node[1]) / self.walkTree(node[2])
 
+		elif node[0] == 'mod':
+			return self.walkTree(node[1]) % self.walkTree(node[2])
+
 		elif node[0] == 'print':
 			print(self.walkTree(node[1]))
 
@@ -208,9 +217,9 @@ class BasicExecute:
 				return 0
 
 		elif node[0] == 'break':
-			return '--break'
+			raise SystemExit
 
-		elif rule == 'if-elif-else':
+		elif node[0] == 'if-elif-else':
 			expr1 = node[1]
 			expr2 = None if node[3] is None else node[3]
 			if expr1:
