@@ -9,8 +9,6 @@ class BasicLexer(Lexer):
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
 				'*', '(', ')', ',', ';'}
-	literals = { '=', '+', '-', '/', '*', '%'
-			'(', ')', ',', ';'}
 
 	# Define tokens as regular expressions
 	# (stored as raw strings)
@@ -36,7 +34,6 @@ class BasicLexer(Lexer):
 		# un-escape escaped characters
 		if len(t.value) > 0:
 			t.value = ast.literal_eval(t.value)
-
 		return t
 
 	# Comment token
@@ -87,7 +84,7 @@ class BasicParser(Parser):
 		return (p.expr)
 
 	@_('STRING')
-	def expr(self, p):
+	def statement(self, p):
 		return (p.STRING)
 
 	@_('expr "+" expr')
@@ -109,7 +106,6 @@ class BasicParser(Parser):
 	# tf is this?
 	@_('"-" expr %prec UMINUS')
 	def expr(self, p):
-		print(dir(p))
 		return p.expr
 
 	@_('NAAM')
@@ -133,48 +129,23 @@ class BasicParser(Parser):
 # Execution Class Start
 class BasicExecute:
 
-	def remove_quotes(self, text: str):
-		if text.startswith('\"') or text.startswith('\''):
-			return text[1:-1]
-		return text
-
 	def __init__(self, tree, env, config):
 		self.env = env
 		self.conf = config
 		result = self.walkTree(tree)
-		if isinstance(result, int):
-			print(result)
-
-		if isinstance(result, int) or isinstance(result, str):
-			print(result)
-
 		if result is not None and (isinstance(result, int) or isinstance(result, str)):
 			print(repr(result))
 
-		elif isinstance(result, str):
-			print(self.remove_quotes(result))
-
 	def walkTree(self, node):
-		if isinstance(node, int):
-			return node
-
-		elif isinstance(node, str):
-			return node
-
-		if isinstance(node, int) or isinstance(node, str):
-			return node
-
-		elif node is None:
-			return None
 
 		if self.conf["DEBUG"] == True:
 			print("[DEBUG]:", repr(node))
 
+		if node is None:
+			return None
+
 		if isinstance(node, int) or isinstance(node, str):
 			return node
-
-		elif node is None:
-			return None
 
 		elif node[0] == 'program':
 			if node[1] == None:
@@ -202,14 +173,8 @@ class BasicExecute:
 			return self.walkTree(node[1]) / self.walkTree(node[2])
 
 		elif node[0] == 'print':
-			return self.walkTree(node[1])
-
-		elif node[0] == 'input':
-			input_result = input(node[2] + "\n")
-			self.env[node[1]] = input_result
-			return f"\"{input()}\""
-
 			print(self.walkTree(node[1]))
+
 		elif node[0] == 'input':
 			optstr = self.walkTree(node[1])
 			if optstr is not None:
@@ -227,5 +192,5 @@ class BasicExecute:
 				return 0
 
 		elif node[0] == 'break':
-			raise SystemExit
+			return '--break'
 # Execution Class End
