@@ -5,10 +5,10 @@ import ast
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC, WTF }
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC, WTF, EQEQ, NEQEQ }
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
-				'*', '%', '(', ')', ',', ';', '%', '==', '!='}
+				'*', '%', '(', ')', ',', ';', '==', '!='}
 
 	# Define tokens as regular expressions
 	# (stored as raw strings)
@@ -22,10 +22,12 @@ class BasicLexer(Lexer):
 	NAAM["nahi toh"] = ELSE
 	NAAM["hatt"] = BREAK
 	NAAM["WTF"] = WTF
+	NAAM["=="] = EQEQ
+	NAAM["!="] = NEQEQ
 
 	# Operators
-	LBRAC = r'\{'
-	RBRAC = r'\}'
+	LBRAC = r'{'
+	RBRAC = r'}'
 
 	# Number token
 	@_(r'\d+')
@@ -113,7 +115,14 @@ class BasicParser(Parser):
 	def expr(self, p):
 		return ('mod', p.expr0, p.expr1)
 
-	# tf is this?
+	@_('expr EQEQ expr')
+	def condition(self, p):
+		return ('eqeq', p.expr0, p.expr1)
+
+	@_('expr NEQEQ expr')
+	def condition(self, p):
+		return ('not_eq', p.expr0, p.expr1)
+
 	@_('"-" expr %prec UMINUS')
 	def expr(self, p):
 		return p.expr
@@ -142,9 +151,9 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return ('break', p.BREAK)
 
-	@_('IF expr LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC statement RBRAC ] ')
+	@_('IF condition LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC RBRAC ] ')
 	def statement(self, p):
-		return ('if-elif-else', p.expr0 ,p.statements0, p.expr1, p.statements1, p.statements2)
+		return ('if_stmt', p.condition, ('branch', p.statement0, p.expr0, p.statement1, p.statement2))
 
 # Parser Class End
 
@@ -219,16 +228,15 @@ class BasicExecute:
 		elif node[0] == 'break':
 			raise SystemExit
 
-		elif node[0] == 'if-elif-else':
-			expr1 = node[1]
-			expr2 = None if node[3] is None else node[3]
-			if expr1:
-				return node[2]
-			elif expr2:
-				return node[4]
-			else:
-				if node[5]:
-					return node[5]
-				else:
-					pass
+		elif node[0] == 'eqeq':
+			node[1] == node[2]
+
+		elif node[0] == 'not_eq':
+			return self.walkTree(node[1]) != self.walkTree(node[2])
+
+		elif node[0] == 'if_stmt':
+			result = self.walkTree(node[1])
+			if result:
+				return self.walkTree(node[2][1])
+			return self.walkTree(node[2][2])
 # Execution Class End
