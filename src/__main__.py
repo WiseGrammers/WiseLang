@@ -6,17 +6,10 @@ config = {
 	"DEBUG": False
 }
 
-if "-d" in sys.argv:
+if "-d" in sys.argv or "--debug" in sys.argv:
 	config["DEBUG"] = True
 
-elif "--debug" in sys.argv:
-	config["DEBUG"] = True
-
-elif "-h" in sys.argv:
-	__name__ = None
-	print("Usage: python3 src/ [options] \n-d, --debug\n\toutput lex, parse and node details to files.\n-h, --help\n\tDisplayes this Text")
-
-elif "--help" in sys.argv:
+elif "-h" in sys.argv or "--help" in sys.argv:
 	__name__ = None
 	print("Usage: python3 src/ [options] \n-d, --debug\n\toutputs lex, parse and node details to files.\n-h, --help\n\tDisplayes this Text")
 
@@ -30,14 +23,15 @@ if __name__ == '__main__':
 	env = {}
 
 	while True:
+		executor = BasicExecute(env, config)
 
 		try:
-			text = input('WiseLang >>>> ')
+			text = input('>>> ')
 
 		except (EOFError, KeyboardInterrupt):
 			break
 
 		if text:
 			tree = parser.parse(lexer.tokenize(text))
-			BasicExecute(tree, env, config)
+			executor.run(tree)
 # Execution End

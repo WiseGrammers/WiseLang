@@ -5,10 +5,10 @@ import ast
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC, WTF }
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, WTF, } # PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC, }
 	ignore = '\t '
-	literals = { '=', '+', '-', '/', 
-				'*', '%', '(', ')', ',', ';', '%', '==', '!='}
+	literals = { '+', '-', '/', '*', '%', 
+				'==', '!=', '='}
 
 	# Define tokens as regular expressions
 	# (stored as raw strings)
@@ -16,16 +16,16 @@ class BasicLexer(Lexer):
 	STRING = r'\".*?\"'
 	NAAM["eww"] = PRINT
 	NAAM["input"] = INPUT
-	NAAM["chutiya"] = PASS
-	NAAM["agar"] = IF
-	NAAM["agar yeh"] = ELIF
-	NAAM["nahi toh"] = ELSE
-	NAAM["hatt"] = BREAK
+	# NAAM["chutiya"] = PASS
+	# NAAM["agar"] = IF
+	# NAAM["agar yeh"] = ELIF
+	# NAAM["nahi toh"] = ELSE
+	# NAAM["hatt"] = BREAK
 	NAAM["WTF"] = WTF
 
 	# Operators
-	LBRAC = r'\{'
-	RBRAC = r'\}'
+	# LBRAC = r'\{'
+	# RBRAC = r'\}'
 
 	# Number token
 	@_(r'\d+')
@@ -91,7 +91,7 @@ class BasicParser(Parser):
 
 	@_('STRING')
 	def statement(self, p):
-		return (p.STRING)
+		return ('str', f'"{p.STRING}"')
 
 	@_('expr "+" expr')
 	def expr(self, p):
@@ -113,10 +113,9 @@ class BasicParser(Parser):
 	def expr(self, p):
 		return ('mod', p.expr0, p.expr1)
 
-	# tf is this?
 	@_('"-" expr %prec UMINUS')
 	def expr(self, p):
-		return p.expr
+		return ('negate', p.expr)
 
 	@_('NAAM')
 	def expr(self, p):
@@ -134,29 +133,31 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return ('input', p.statement)
 
-	@_('PASS')
-	def statement(self, p):
-		pass
+	# @_('PASS')
+	# def statement(self, p):
+	# 	pass
 
-	@_('BREAK')
-	def statement(self, p):
-		return ('break', p.BREAK)
+	# @_('BREAK')
+	# def statement(self, p):
+	# 	return ('break', p.BREAK)
 
-	@_('IF expr LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC statement RBRAC ] ')
-	def statement(self, p):
-		return ('if-elif-else', p.expr0 ,p.statements0, p.expr1, p.statements1, p.statements2)
+	# @_('IF expr LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC statement RBRAC ] ')
+	# def statement(self, p):
+	# 	return ('if-elif-else', p.expr0 ,p.statements0, p.expr1, p.statements1, p.statements2)
 
 # Parser Class End
 
 # Execution Class Start
 class BasicExecute:
 
-	def __init__(self, tree, env, config):
+	def __init__(self, env, config):
 		self.env = env
 		self.conf = config
+
+	def run(self, tree):
 		result = self.walkTree(tree)
-		if result is not None and (isinstance(result, int) or isinstance(result, str)):
-			print(repr(result))
+		if result is not None and ((isinstance(result, float), isinstance(result, int)) or isinstance(result, str)):
+			return repr(result)
 
 	def walkTree(self, node):
 
@@ -165,9 +166,6 @@ class BasicExecute:
 
 		if node is None:
 			return None
-
-		if isinstance(node, int) or isinstance(node, str):
-			return node
 
 		elif node[0] == 'program':
 			if node[1] == None:
@@ -180,7 +178,7 @@ class BasicExecute:
 			return node[1]
 
 		elif node[0] == 'str':
-			return node[0]
+			return node[1][1:-1]
 
 		elif node[0] == 'add':
 			return self.walkTree(node[1]) + self.walkTree(node[2])
@@ -197,8 +195,16 @@ class BasicExecute:
 		elif node[0] == 'mod':
 			return self.walkTree(node[1]) % self.walkTree(node[2])
 
+		elif node[0] == 'negate':
+			return -1 * self.walkTree(node[1])
+
 		elif node[0] == 'print':
-			print(self.walkTree(node[1]))
+			tmp = self.walkTree(node[1])
+			if tmp is not None:
+				print(tmp)
+			else:
+				print('')
+			del tmp
 
 		elif node[0] == 'input':
 			optstr = self.walkTree(node[1])
@@ -214,21 +220,22 @@ class BasicExecute:
 				return self.env[node[1]]
 			except LookupError:
 				print("Undefined variable '"+node[1]+"' found!")
-				return 0
 
-		elif node[0] == 'break':
-			raise SystemExit
+		# elif node[0] == 'break':
+			# raise SystemExit
 
-		elif node[0] == 'if-elif-else':
-			expr1 = node[1]
-			expr2 = None if node[3] is None else node[3]
-			if expr1:
-				return node[2]
-			elif expr2:
-				return node[4]
-			else:
-				if node[5]:
-					return node[5]
-				else:
-					pass
+
+'''don't uncomment this'''
+		# elif node[0] == 'if-elif-else':
+		# 	expr1 = node[1]
+		# 	expr2 = None if node[3] is None else node[3]
+		# 	if expr1:
+		# 		return node[2]
+		# 	elif expr2:
+		# 		return node[4]
+		# 	else:
+		# 		if node[5]:
+		# 			return node[5]
+		# 		else:
+		# 			pass
 # Execution Class End
