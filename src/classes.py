@@ -5,10 +5,10 @@ import ast
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK }
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC }
 	ignore = '\t '
 	literals = { '=', '+', '-', '/', 
-				'*', '(', ')', ',', ';'}
+				'*', '(', ')', ',', ';', '%', '==', '!='}
 
 	# Define tokens as regular expressions
 	# (stored as raw strings)
@@ -21,6 +21,10 @@ class BasicLexer(Lexer):
 	NAAM["agar yeh"] = ELIF
 	NAAM["nahi toh"] = ELSE
 	NAAM["hatt"] = BREAK
+
+	# Operators
+	LBRAC = r'\{'
+	RBRAC = r'\}'
 
 	# Number token
 	@_(r'\d+')
@@ -124,6 +128,18 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return ('input', p.statement)
 
+	@_('PASS')
+	def statement(self, p):
+		pass
+
+	@_('BREAK')
+	def statement(self, p):
+		return ('break', p.BREAK)
+
+	@_('IF expr LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC statement RBRAC ] ')
+	def statement(self, p):
+		return ('if-elif-else', p.expr0 ,p.statements0, p.expr1, p.statements1, p.statements2)
+
 # Parser Class End
 
 # Execution Class Start
@@ -193,4 +209,17 @@ class BasicExecute:
 
 		elif node[0] == 'break':
 			return '--break'
+
+		elif rule == 'if-elif-else':
+			expr1 = node[1]
+			expr2 = None if node[3] is None else node[3]
+			if expr1:
+				return node[2]
+			elif expr2:
+				return node[4]
+			else:
+				if node[5]:
+					return node[5]
+				else:
+					pass
 # Execution Class End
