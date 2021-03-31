@@ -168,7 +168,10 @@ class BasicExecute:
 		elif node[0] == 'print':
 			print(self.walkTree(node[1]))
 		elif node[0] == 'input':
-			return input(self.walkTree(node[1]))
+			optstr = self.walkTree(node[1])
+			if optstr is not None:
+				return input(optstr)
+			return input()
 
 		elif node[0] == 'var_assign':
 			self.env[node[1]] = self.walkTree(node[2])
