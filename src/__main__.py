@@ -32,5 +32,7 @@ if __name__ == '__main__':
 
 		if text:
 			tree = parser.parse(lexer.tokenize(text))
-			print(executor.run(tree))
+			res = executor.run(tree)
+			if res is not None:
+				print(res)
 # Execution End
