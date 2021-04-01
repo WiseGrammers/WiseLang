@@ -1,7 +1,7 @@
 # WiseLang
 A Wise language, for wise members of AUI
 
-we've created this lannguage for out beloved AUIians to learn how to code and become the next chintu!
+we've created this lannguage for our beloved AUIians to learn how to code and become the next chintu!
 
 ## Requirements
 
@@ -32,7 +32,7 @@ nahi toh {  // else statement
 
 ## Running the program
 
-you this to run wiselang interpreter in normal mode
+use this to run wiselang interpreter in normal mode
 ```
 python src
 ```

@@ -5,10 +5,10 @@ import ast
 
 # Lexer Class Start
 class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT }
+	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC, WTF, EQEQ, NEQEQ }
 	ignore = '\t '
-	literals = { '=', '+', '-', '/', '*', '%'
-			'(', ')', ',', ';'}
+	literals = { '=', '+', '-', '/', 
+				'*', '%', '(', ')', ',', ';', '==', '!='}
 
 	# Define tokens as regular expressions
 	# (stored as raw strings)
@@ -16,6 +16,18 @@ class BasicLexer(Lexer):
 	STRING = r'\".*?\"'
 	NAAM["eww"] = PRINT
 	NAAM["input"] = INPUT
+	NAAM["chutiya"] = PASS
+	NAAM["agar"] = IF
+	NAAM["agar yeh"] = ELIF
+	NAAM["nahi toh"] = ELSE
+	NAAM["hatt"] = BREAK
+	NAAM["WTF"] = WTF
+	NAAM["=="] = EQEQ
+	NAAM["!="] = NEQEQ
+
+	# Operators
+	LBRAC = r'{'
+	RBRAC = r'}'
 
 	# Number token
 	@_(r'\d+')
@@ -29,7 +41,6 @@ class BasicLexer(Lexer):
 		# un-escape escaped characters
 		if len(t.value) > 0:
 			t.value = ast.literal_eval(t.value)
-
 		return t
 
 	# Comment token
@@ -51,17 +62,17 @@ class BasicLexer(Lexer):
 
 # Parser Class Start
 class BasicParser(Parser):
-	#tokens are passed from lexer to parser
 	tokens = BasicLexer.tokens
 
 	precedence = (
 		('left', '+', '-'),
 		('left', '*', '/'),
+		('left', '%'),
 		('right', 'UMINUS'),
 		('left', PRINT, INPUT)
 	)
 
-	def __init__(self):
+	def __init__(self, config):
 		self.env = { }
 
 	@_('')
@@ -72,7 +83,7 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return p.var_assign
 
-	@_('NAAM "=" statement')
+	@_('WTF NAAM "=" statement')
 	def var_assign(self, p):
 		return ('var_assign', p.NAAM, p.statement)
 
@@ -81,7 +92,7 @@ class BasicParser(Parser):
 		return (p.expr)
 
 	@_('STRING')
-	def expr(self, p):
+	def statement(self, p):
 		return (p.STRING)
 
 	@_('expr "+" expr')
@@ -100,7 +111,18 @@ class BasicParser(Parser):
 	def expr(self, p):
 		return ('div', p.expr0, p.expr1)
 
-	# tf is this?
+	@_('expr "%" expr')
+	def expr(self, p):
+		return ('mod', p.expr0, p.expr1)
+
+	@_('expr EQEQ expr')
+	def condition(self, p):
+		return ('eqeq', p.expr0, p.expr1)
+
+	@_('expr NEQEQ expr')
+	def condition(self, p):
+		return ('not_eq', p.expr0, p.expr1)
+
 	@_('"-" expr %prec UMINUS')
 	def expr(self, p):
 		return p.expr
@@ -121,6 +143,18 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return ('input', p.statement)
 
+	@_('PASS')
+	def statement(self, p):
+		pass
+
+	@_('BREAK')
+	def statement(self, p):
+		return ('break', p.BREAK)
+
+	@_('IF condition LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC RBRAC ] ')
+	def statement(self, p):
+		return ('if_stmt', p.condition, ('branch', p.statement0, p.expr0, p.statement1, p.statement2))
+
 # Parser Class End
 
 # Execution Class Start
@@ -138,11 +172,11 @@ class BasicExecute:
 		if self.conf["DEBUG"] == True:
 			print("[DEBUG]:", repr(node))
 
-		if isinstance(node, int) or isinstance(node, str):
-			return node
-
 		elif node is None:
 			return None
+
+		elif isinstance(node, int) or isinstance(node, str):
+			return node
 
 		elif node[0] == 'program':
 			if node[1] == None:
@@ -159,14 +193,22 @@ class BasicExecute:
 
 		elif node[0] == 'add':
 			return self.walkTree(node[1]) + self.walkTree(node[2])
+
 		elif node[0] == 'sub':
 			return self.walkTree(node[1]) - self.walkTree(node[2])
+
 		elif node[0] == 'mul':
 			return self.walkTree(node[1]) * self.walkTree(node[2])
+
 		elif node[0] == 'div':
 			return self.walkTree(node[1]) / self.walkTree(node[2])
+
+		elif node[0] == 'mod':
+			return self.walkTree(node[1]) % self.walkTree(node[2])
+
 		elif node[0] == 'print':
 			print(self.walkTree(node[1]))
+
 		elif node[0] == 'input':
 			optstr = self.walkTree(node[1])
 			if optstr is not None:
@@ -181,4 +223,20 @@ class BasicExecute:
 				return self.env[node[1]]
 			except LookupError:
 				print("Undefined variable '"+node[1]+"' found!")
+				return 0
+
+		elif node[0] == 'break':
+			raise SystemExit
+
+		elif node[0] == 'eqeq':
+			return node[1] == node[2]
+
+		elif node[0] == 'not_eq':
+			return self.walkTree(node[1]) != self.walkTree(node[2])
+
+		elif node[0] == 'if_stmt':
+			result = self.walkTree(node[1])
+			if result:
+				return self.walkTree(node[2][1])
+			return self.walkTree(node[2][2])
 # Execution Class End
