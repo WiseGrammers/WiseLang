@@ -34,7 +34,7 @@ nahi toh {  // else statement
 
 use this to run wiselang interpreter in normal mode
 ```
-python src
+python src [file] 
 ```
 
 ### Debug Mode
@@ -43,5 +43,6 @@ you can turn on debug mode with '-d' switch
 (even though it is useless for end users for me its very useful)
 
 ```
-python src -d
+python src -d [file]
 ```
+(you can provide a file or else run the interpreter in interactive mode)
