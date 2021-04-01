@@ -72,9 +72,6 @@ class BasicParser(Parser):
 		('left', PRINT, INPUT)
 	)
 
-	def __init__(self, config):
-		self.env = { }
-
 	@_('')
 	def statement(self, p):
 		pass
@@ -160,20 +157,19 @@ class BasicParser(Parser):
 # Execution Class Start
 class BasicExecute:
 
-	def __init__(self, tree, env, config):
+	def __init__(self, env, config):
 		self.env = env
 		self.conf = config
+
+	def run(self, tree):
 		result = self.walkTree(tree)
 		if result is not None and (isinstance(result, int) or isinstance(result, str)):
-			print(repr(result))
+			return (repr(result))
 
 	def walkTree(self, node):
 
 		if self.conf["DEBUG"] == True:
 			print("[DEBUG]:", repr(node))
-
-		elif node is None:
-			return None
 
 		if node is None:
 			return None
@@ -226,7 +222,7 @@ class BasicExecute:
 				return self.env[node[1]]
 			except LookupError:
 				print("Undefined variable '"+node[1]+"' found!")
-				return 0
+				return
 
 		elif node[0] == 'break':
 			raise SystemExit

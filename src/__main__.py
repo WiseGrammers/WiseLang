@@ -19,11 +19,10 @@ VERSION = "v0.3 Lawda"
 if __name__ == '__main__':
 	lexer = BasicLexer()
 	parser = BasicParser()
+	executor = BasicExecute({}, config)
 	print(f'WiseLang {VERSION}:')
-	env = {}
 
 	while True:
-		executor = BasicExecute(env, config)
 
 		try:
 			text = input('>>> ')
@@ -33,5 +32,5 @@ if __name__ == '__main__':
 
 		if text:
 			tree = parser.parse(lexer.tokenize(text))
-			executor.run(tree)
+			print(executor.run(tree))
 # Execution End
