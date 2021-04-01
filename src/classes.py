@@ -175,7 +175,10 @@ class BasicExecute:
 		elif node is None:
 			return None
 
-		elif isinstance(node, int) or isinstance(node, str):
+		if node is None:
+			return None
+
+		if isinstance(node, int) or isinstance(node, str):
 			return node
 
 		elif node[0] == 'program':
@@ -230,6 +233,7 @@ class BasicExecute:
 
 		elif node[0] == 'eqeq':
 			return node[1] == node[2]
+			node[1] == node[2]
 
 		elif node[0] == 'not_eq':
 			return self.walkTree(node[1]) != self.walkTree(node[2])
