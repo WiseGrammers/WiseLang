@@ -1,33 +1,55 @@
 # Imports
-from sly import Lexer
-from sly import Parser
+from sly import Lexer, Parser
 import ast
 
 # Lexer Class Start
-class BasicLexer(Lexer):
-	tokens = { NAAM, NUMBER, STRING, PRINT, INPUT, PASS, IF, ELIF, ELSE, BREAK, LBRAC, RBRAC, WTF, EQEQ, NEQEQ }
-	ignore = '\t '
-	literals = { '=', '+', '-', '/', 
-				'*', '%', '(', ')', ',', ';', '==', '!='}
+class WiseLexer(Lexer):
+	tokens = {
+		NAAM, NUMBER, STRING,
+		PRINT, INPUT, DECLARE,
+		# PASS, BREAK, IF, ELIF,
+		# ELSE, LBRAC, RBRAC,
+		PLUS, SUB, MUL,
+		DIV, MOD, LPAREN,
+		RPAREN, EQ, NE
+	}
+
+
+	# Ignored patterns
+	ignore_newline = r'\n+'
+	ignore_comment = r'//.*\n*'
+	ignore = ' \t'
+
+	literals = {
+		'='
+	}
 
 	# Define tokens as regular expressions
 	# (stored as raw strings)
-	NAAM = r'[a-zA-Z_][a-zA-Z0-9_]*'
+	NAAM = r'[a-zA-Z_\$][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
+
+	# NAAM["agar yeh"] = ELIF
+	# NAAM["agar"] = IF
+	# NAAM["chutiya"] = PASS
 	NAAM["eww"] = PRINT
 	NAAM["input"] = INPUT
-	NAAM["chutiya"] = PASS
-	NAAM["agar"] = IF
-	NAAM["agar yeh"] = ELIF
-	NAAM["nahi toh"] = ELSE
-	NAAM["hatt"] = BREAK
-	NAAM["WTF"] = WTF
-	NAAM["=="] = EQEQ
-	NAAM["!="] = NEQEQ
+	NAAM["WTF"] = DECLARE
+	# NAAM["hatt"] = BREAK
+	# NAAM["nahi toh"] = ELSE
 
 	# Operators
-	LBRAC = r'{'
-	RBRAC = r'}'
+	# LBRAC = r'\{'
+	# RBRAC = r'\}'
+	LPAREN = r'\('
+	RPAREN = r'\)'
+	EQ = r'=='
+	NE = r'!='
+	PLUS = r'\+'
+	SUB = r'-'
+	MUL = r'\*'
+	DIV = r'/'
+	MOD = r'%'
 
 	# Number token
 	@_(r'\d+')
@@ -43,94 +65,40 @@ class BasicLexer(Lexer):
 			t.value = ast.literal_eval(t.value)
 		return t
 
-	# Comment token
-	@_(r'//.*')
-	def COMMENT(self, t):
-		pass
+	def ignore_newline(self, t):
+		self.lineno += t.value.count('\n')
 
-	# Newline token(used only for showing
-	# errors in new line)
-	@_(r'\n+')
-	def NEWLINE(self, t):
-		self.lineno = t.value.count('\n')
-
-	# error handling.....?
+	# error handling
 	def error(self, t):
-		print("Illegal character '%s'" % t.value[0])
+		print(f"Error: line {self.lineno}:{self.index} Illegal character '%s'" % t.value[0])
 		self.index += 1
+		return t
 # Lexer Class End
 
 # Parser Class Start
-class BasicParser(Parser):
-	tokens = BasicLexer.tokens
+class WiseParser(Parser):
+	tokens = WiseLexer.tokens
 
 	precedence = (
-		('left', '+', '-'),
-		('left', '*', '/'),
-		('left', '%'),
+		('left', EQ, NE),
+		('left', PLUS, SUB),
+		('left', MUL, DIV),
+		('left', MOD),
 		('right', 'UMINUS'),
 		('left', PRINT, INPUT)
 	)
 
-	@_('')
-	def statement(self, p):
-		pass
+	@_('statements')
+	def main(self, p):
+		return ('main', p.statements)
 
-	@_('var_assign')
-	def statement(self, p):
-		return p.var_assign
+	@_('statement')
+	def statements(self,p):
+		return ('statements', [p.statement])
 
-	@_('WTF NAAM "=" statement')
-	def var_assign(self, p):
-		return ('var_assign', p.NAAM, p.statement)
-
-	@_('expr')
-	def statement(self, p):
-		return (p.expr)
-
-	@_('STRING')
-	def statement(self, p):
-		return (p.STRING)
-
-	@_('expr "+" expr')
-	def expr(self, p):
-		return ('add', p.expr0, p.expr1)
-
-	@_('expr "-" expr')
-	def expr(self, p):
-		return ('sub', p.expr0, p.expr1)
-
-	@_('expr "*" expr')
-	def expr(self, p):
-		return ('mul', p.expr0, p.expr1)
-
-	@_('expr "/" expr')
-	def expr(self, p):
-		return ('div', p.expr0, p.expr1)
-
-	@_('expr "%" expr')
-	def expr(self, p):
-		return ('mod', p.expr0, p.expr1)
-
-	@_('expr EQEQ expr')
-	def condition(self, p):
-		return ('eqeq', p.expr0, p.expr1)
-
-	@_('expr NEQEQ expr')
-	def condition(self, p):
-		return ('not_eq', p.expr0, p.expr1)
-
-	@_('"-" expr %prec UMINUS')
-	def expr(self, p):
-		return p.expr
-
-	@_('NAAM')
-	def expr(self, p):
-		return ('var', p.NAAM)
-
-	@_('NUMBER')
-	def expr(self, p):
-		return ('num', p.NUMBER)
+	@_('statements statement')
+	def statements(self,p):
+		return ('statements', p.statements[1] + [p.statement])
 
 	@_('PRINT statement')
 	def statement(self, p):
@@ -140,103 +108,192 @@ class BasicParser(Parser):
 	def statement(self, p):
 		return ('input', p.statement)
 
-	@_('PASS')
+	@_('expr')
 	def statement(self, p):
-		pass
+		return ('expr', p.expr)
 
-	@_('BREAK')
+	@_('LPAREN expr RPAREN')
 	def statement(self, p):
-		return ('break', p.BREAK)
+		return ('wrapped-expr', p.expr)
 
-	@_('IF condition LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC RBRAC ] ')
+	@_('DECLARE NAAM "=" statement')
 	def statement(self, p):
-		return ('if_stmt', p.condition, ('branch', p.statement0, p.expr0, p.statement1, p.statement2))
+		return ('assign', p.NAAM, p.statement)
 
+	@_('expr PLUS expr')
+	def expr(self, p):
+		return ('add', p.expr0, p.expr1)
+
+	@_('expr SUB expr')
+	def expr(self, p):
+		return ('sub', p.expr0, p.expr1)
+
+	@_('expr MUL expr')
+	def expr(self, p):
+		return ('mul', p.expr0, p.expr1)
+
+	@_('expr DIV expr')
+	def expr(self, p):
+		return ('div', p.expr0, p.expr1)
+
+	@_('expr MOD expr')
+	def expr(self, p):
+		return ('mod', p.expr0, p.expr1)
+
+	@_('expr EQ expr')
+	def expr(self, p):
+		return ('eq', p.expr0, p.expr1)
+
+	@_('expr NE expr')
+	def expr(self, p):
+		return ('not_eq', p.expr0, p.expr1)
+
+	@_('"-" expr %prec UMINUS')
+	def expr(self, p):
+		return ('negate', p.expr)
+
+	@_('NUMBER')
+	def expr(self, p):
+		return ('num', p.NUMBER)
+
+	@_('STRING')
+	def expr(self, p):
+		return ('str', p.STRING)
+
+	@_('NAAM')
+	def expr(self, p):
+		return ('var', p.NAAM)
+
+	# @_('PASS')
+	# def statement(self, p):
+	# 	pass
+
+	# @_('BREAK')
+	# def statement(self, p):
+	# 	return ('break', p.BREAK)
+
+	# @_('IF condition LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC RBRAC ] ')
+	# def statement(self, p):
+	# 	return ('if_stmt', p.condition, ('branch', p.statement0, p.expr0, p.statement1, p.statement2))
 # Parser Class End
 
-# Execution Class Start
-class BasicExecute:
+# Executor Class Start
+class Executor:
+
+	def _NameError(self, name):
+		return f"NameError: line {self.lineno}, Variable {name} is not defined"
+
+	def _OperationError(self, operator, typeA, typeB=None):
+		if typeB:
+			return f"OperationError: line {self.lineno}, Unsupported operation: {operator} between types: {typeA} and {typeB}"
+		return f"OperationError: line {self.lineno}, Unsupported operation: {operator} with type: {typeA}"
+
+	def _DivisionByZeroError(self):
+		return f"DivisionByZeroError: line {self.lineno}, cannot divide by zero"
+
+	@staticmethod
+	def _type(_obj):
+		return str(type(_obj)).split("'")[1]
 
 	def __init__(self, env, config):
 		self.env = env
 		self.conf = config
+		self.lineno = 1
 
 	def run(self, tree):
-		result = self.walkTree(tree)
-		if result is not None and (isinstance(result, int) or isinstance(result, str)):
-			return (repr(result))
+		if self.conf["DEBUG"]:
+			print('[DEBUG]:', tree)
 
-	def walkTree(self, node):
+		try:
+			rule = tree[0]
+		except TypeError:
+			return print('Exception: INTERNAL ERROR!!')
 
-		if self.conf["DEBUG"] == True:
-			print("[DEBUG]:", repr(node))
-
-		if node is None:
-			return None
-
-		if isinstance(node, int) or isinstance(node, str):
-			return node
-
-		elif node[0] == 'program':
-			if node[1] == None:
-				self.walkTree(node[2])
-			else:
-				self.walkTree(node[1])
-				self.walkTree(node[2])
-
-		elif node[0] == 'num':
-			return node[1]
-
-		elif node[0] == 'str':
-			return node[0]
-
-		elif node[0] == 'add':
-			return self.walkTree(node[1]) + self.walkTree(node[2])
-
-		elif node[0] == 'sub':
-			return self.walkTree(node[1]) - self.walkTree(node[2])
-
-		elif node[0] == 'mul':
-			return self.walkTree(node[1]) * self.walkTree(node[2])
-
-		elif node[0] == 'div':
-			return self.walkTree(node[1]) / self.walkTree(node[2])
-
-		elif node[0] == 'mod':
-			return self.walkTree(node[1]) % self.walkTree(node[2])
-
-		elif node[0] == 'print':
-			print(self.walkTree(node[1]))
-
-		elif node[0] == 'input':
-			optstr = self.walkTree(node[1])
-			if optstr is not None:
-				return input(optstr)
-			return input()
-
-		elif node[0] == 'var_assign':
-			self.env[node[1]] = self.walkTree(node[2])
-
-		elif node[0] == 'var':
-			try:
-				return self.env[node[1]]
-			except LookupError:
-				print("Undefined variable '"+node[1]+"' found!")
+		if rule == 'main':
+			self.run(tree[1])
+		elif rule == 'statements':
+			for i in tree[1]:
+				self.run(i)
+				self.lineno += 1
+		elif rule == 'expr':
+			val = self.run(tree[1])
+			if val is None:
 				return
 
-		elif node[0] == 'break':
-			raise SystemExit
+			return val
+		elif rule == 'assign':
+			val = self.run(tree[2])
+			if val is None: return
 
-		elif node[0] == 'eqeq':
-			return node[1] == node[2]
-			node[1] == node[2]
+			self.env[tree[1]] = val
+			return val
 
-		elif node[0] == 'not_eq':
-			return self.walkTree(node[1]) != self.walkTree(node[2])
+		elif rule in ('mul', 'div', 'add', 'sub', 'mod'):
+			x = self.run(tree[1])
+			y = self.run(tree[2])
+			if x is None or y is None: return
 
-		elif node[0] == 'if_stmt':
-			result = self.walkTree(node[1])
-			if result:
-				return self.walkTree(node[2][1])
-			return self.walkTree(node[2][2])
-# Execution Class End
+			try:
+				if rule == 'mul':
+					op = '*'
+					return x * y
+				elif rule == 'div':
+					op = '/'
+					if y == 0:
+						return print(self._DivisionByZeroError())
+					return x / y
+				elif rule == 'add':
+					op = '+'
+					return x + y
+				elif rule == 'sub':
+					op = '-'
+					return x - y
+				elif rule == 'mod':
+					op = '%'
+					return x % y
+			except TypeError:
+				return print(self._OperationError(op, self._type(x), self._type(y)))
+
+		elif rule == 'eq':
+			return int(self.run(tree[1]) == self.run(tree[2]))
+		elif rule == 'not_eq':
+			return int(self.run(tree[1]) != self.run(tree[2]))
+
+		elif rule == 'negate':
+			val = self.run(tree[1])
+			if val is None:
+				return
+
+			try:
+				return -val
+			except TypeError:
+				return print(self._OperationError('-', self._type(val)))
+		elif rule in ('num', 'str'):
+			return tree[1]
+		elif rule == 'var':
+			try:
+				return self.env[tree[1]]
+			except KeyError:
+				return print(self._NameError(tree[1]))
+		elif rule == 'wrapped-expr':
+			val = evaluate(tree[1])
+			if val is None:
+				return
+
+				return val
+		elif rule == 'print':
+			val = self.run(tree[1])
+			if val is None:
+				return
+
+			print(val)
+			return val
+		elif rule == 'input':
+			val = self.run(tree[1])
+			if val is None:
+				return
+
+			return input(val)
+		else:
+			return print("Exception: INTERNAL ERROR!!")
+# Executor Class End
