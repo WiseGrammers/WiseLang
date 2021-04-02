@@ -148,7 +148,7 @@ class WiseParser(Parser):
 	def expr(self, p):
 		return ('not_eq', p.expr0, p.expr1)
 
-	@_('"-" expr %prec UMINUS')
+	@_('SUB expr %prec UMINUS')
 	def expr(self, p):
 		return ('negate', p.expr)
 
@@ -211,18 +211,18 @@ class Executor:
 
 		if rule == 'main':
 			self.run(tree[1])
+
 		elif rule == 'statements':
 			for i in tree[1]:
 				self.run(i)
 				self.lineno += 1
+
 		elif rule == 'expr':
 			val = self.run(tree[1])
 			if val is None:
 				return
-
-			if self.conf["INTERACTIVE"]:
-				print(repr(val))
 			return val
+
 		elif rule == 'assign':
 			val = self.run(tree[2])
 			if val is None: return
@@ -257,45 +257,47 @@ class Executor:
 				return print(self._OperationError(op, self._type(x), self._type(y)))
 
 		elif rule == 'eq':
-			return int(self.run(tree[1]) == self.run(tree[2]))
+			return self.run(tree[1]) == self.run(tree[2])
 		elif rule == 'not_eq':
-			return int(self.run(tree[1]) != self.run(tree[2]))
+			return self.run(tree[1]) != self.run(tree[2])
 
 		elif rule == 'negate':
 			val = self.run(tree[1])
 			if val is None:
 				return
-
 			try:
 				return -val
 			except TypeError:
 				return print(self._OperationError('-', self._type(val)))
+
 		elif rule in ('num', 'str'):
 			return tree[1]
+
 		elif rule == 'var':
 			try:
 				return self.env[tree[1]]
 			except KeyError:
 				return print(self._NameError(tree[1]))
+
 		elif rule == 'wrapped-expr':
-			val = evaluate(tree[1])
+			val = self.run(tree[1])
 			if val is None:
 				return
+			return val
 
-				return val
 		elif rule == 'print':
 			val = self.run(tree[1])
 			if val is None:
 				return
-
 			print(val)
 			return val
+
 		elif rule == 'input':
 			val = self.run(tree[1])
 			if val is None:
 				return
-
 			return input(val)
+
 		else:
 			return print("Exception: INTERNAL ERROR!!")
 # Executor Class End
