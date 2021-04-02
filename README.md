@@ -30,8 +30,7 @@ nahi toh {  // else statement
 }
 ```
 
-[<h6>You can find additional Information/Documentation about the project on our</h6>]
-[Wiki](https://github.com/Sakon13/WiseLang/wiki "Our Wiki boii")
+You can find additional Information/Documentation about the project on our [Wiki](https://github.com/Sakon13/WiseLang/wiki "Our Wiki boii")
 
 
 ## Running the program
