@@ -30,6 +30,8 @@ nahi toh {  // else statement
 }
 ```
 
+<h6>you can find additional Information/Documentation about the project on our [Wiki](https://github.com/Sakon13/WiseLang/wiki)</h6>
+
 ## Running the program
 
 use this to run wiselang interpreter in normal mode
