@@ -14,8 +14,9 @@ if __name__ == '__main__':
 	if len(sys.argv) > 0 and os.path.isfile(sys.argv[-1]):
 		with open(sys.argv[-1]) as f:
 			text = f.read()
+	else:
+		text = None
 		config["INTERACTIVE"] = True
-	else: text = None
 
 	if "-d" in sys.argv or "--debug" in sys.argv:
 		config["DEBUG"] = True

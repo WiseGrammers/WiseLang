@@ -220,6 +220,8 @@ class Executor:
 			if val is None:
 				return
 
+			if self.conf["INTERACTIVE"]:
+				print(repr(val))
 			return val
 		elif rule == 'assign':
 			val = self.run(tree[2])
