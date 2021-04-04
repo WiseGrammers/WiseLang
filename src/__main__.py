@@ -1,5 +1,5 @@
 from classes import WiseLexer, WiseParser, Executor
-import sys, os, io, contextlib
+import sys, os
 
 # Default config
 config = {
@@ -46,7 +46,10 @@ if __name__ == '__main__':
 			if not config["INTERACTIVE"] and not config["DEBUG"]:
 				break
 			text = None
+<<<<<<< HEAD
 
 		elif text and text == "exit":
 			print("goodbye.......")
 			break
+=======
+>>>>>>> b8160d59b9b5c0d63406aa3449842bd014b4713a
