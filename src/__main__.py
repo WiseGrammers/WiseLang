@@ -22,7 +22,7 @@ if __name__ == '__main__':
 		config["DEBUG"] = True
 
 	elif "-h" in sys.argv or "--help" in sys.argv:
-		print("Usage: python3 src/ [options] \n-d, --debug\n\toutputs lex, parse and node details to files.\n-h, --help\n\tDisplayes this Text")
+		print("Usage: python3 src/ [file] [options] \n-d, --debug\n\toutputs lex, parse and node details to files.\n-h, --help\n\tDisplayes this Text")
 		sys.exit()
 
 	lexer = WiseLexer()
@@ -39,10 +39,17 @@ if __name__ == '__main__':
 		except (EOFError, KeyboardInterrupt):
 			break
 
-		if text:
+		if text and text != "exit":
 			tree = parser.parse(lexer.tokenize(text))
 			if tree:
 				executor.run(tree)
 			if not config["INTERACTIVE"] and not config["DEBUG"]:
 				break
 			text = None
+<<<<<<< HEAD
+
+		elif text and text == "exit":
+			print("goodbye.......")
+			break
+=======
+>>>>>>> b8160d59b9b5c0d63406aa3449842bd014b4713a
