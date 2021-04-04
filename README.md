@@ -27,8 +27,12 @@ agar a == 10 { // if statement
   eww " a is 10"
 }
 
-nahi toh {  // else statement
+agar nahi a != 10 {  // elif statement
   chutiya // pass
+}
+
+nahi toh { // else statement
+  chutiya
 }
 ```
 

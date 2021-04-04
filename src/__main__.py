@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
 		if text == "exit":
 			break
-		if text:
+		elif text:
 			tree = parser.parse(lexer.tokenize(text))
 			if tree:
 				executor.run(tree)
