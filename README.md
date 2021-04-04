@@ -15,7 +15,7 @@ pip install -r requirements.txt
 
 ## Examples:
 
-```python
+```javascript
 // this is a comment
 
 eww "hello world" // displays "hello world"
