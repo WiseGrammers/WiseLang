@@ -95,7 +95,8 @@ class WiseParser(Parser):
 		('left', MUL, DIV),
 		('left', MOD),
 		('right', 'UMINUS'),
-		('left', PRINT, INPUT)
+		('left', PRINT, INPUT),
+		('left', LBRAC, RBRAC, LPAREN, RPAREN)
 	)
 
 	@_('statements')

@@ -1,9 +1,13 @@
-WTF a = 10
+WTF a = 50
 
 agar a == 10 {
 	eww "a is 10!"
 }
 
+agar nahi a == 20 {
+	eww "a is 20!"
+}
+
 nahi toh {
-	eww "a is not 10!"
+	eww "What the fuck is a?"
 }
