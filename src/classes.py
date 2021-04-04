@@ -32,6 +32,7 @@ class WiseLexer(Lexer):
 	# (stored as raw strings)
 	NAAM = r'[a-zA-Z_\$][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
+	EOS = r';'
 
 	NAAM["agar"] = IF
 	NAAM["nahi"] = ELSE
@@ -93,10 +94,11 @@ class WiseLexer(Lexer):
 
 # Parser Class Start
 class WiseParser(Parser):
+	debugfile = 'log.out'
 	tokens = WiseLexer.tokens
 
 	precedence = (
-		('left', EQ, NE),
+		('left', EQ, NE, ST, GT, STE, GTE),
 		('left', PLUS, SUB),
 		('left', MUL, DIV),
 		('left', MOD),
@@ -108,11 +110,11 @@ class WiseParser(Parser):
 	def main(self, p):
 		return ('main', p.statements)
 
-	@_('statement')
+	@_('statement EOS')
 	def statements(self,p):
 		return ('statements', [p.statement])
 
-	@_('statements statement')
+	@_('statements statement EOS')
 	def statements(self,p):
 		return ('statements', p.statements[1] + [p.statement])
 
