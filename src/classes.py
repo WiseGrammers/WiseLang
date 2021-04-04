@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Imports
 from sly import Lexer, Parser
 import ast
