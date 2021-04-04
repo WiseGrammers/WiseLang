@@ -13,7 +13,9 @@ class WiseLexer(Lexer):
 		# ELSE, LBRAC, RBRAC,
 		PLUS, SUB, MUL,
 		DIV, MOD, LPAREN,
-		RPAREN, EQ, NE
+		RPAREN, EQ, NE,
+		ST, GT, STE,
+		GTE, EOS
 	}
 
 
@@ -47,6 +49,10 @@ class WiseLexer(Lexer):
 	RPAREN = r'\)'
 	EQ = r'=='
 	NE = r'!='
+	STE = r'<='
+	GTE = r'>='
+	ST = r'<'
+	GT = r'>'
 	PLUS = r'\+'
 	SUB = r'-'
 	MUL = r'\*'
@@ -149,6 +155,22 @@ class WiseParser(Parser):
 	@_('expr NE expr')
 	def expr(self, p):
 		return ('not_eq', p.expr0, p.expr1)
+
+	@_('expr ST expr')
+	def expr(self, p):
+		return ('st', p.expr0, p.expr1)
+
+	@_('expr GT expr')
+	def expr(self, p):
+		return ('gt', p.expr0, p.expr1)
+
+	@_('expr STE expr')
+	def expr(self, p):
+		return ('st_eq', p.expr0, p.expr1)
+
+	@_('expr GTE expr')
+	def expr(self, p):
+		return ('gt_eq', p.expr0, p.expr1)
 
 	@_('SUB expr %prec UMINUS')
 	def expr(self, p):
@@ -262,6 +284,14 @@ class Executor:
 			return self.run(tree[1]) == self.run(tree[2])
 		elif rule == 'not_eq':
 			return self.run(tree[1]) != self.run(tree[2])
+		elif rule == 'st':
+			return self.run(tree[1]) < self.run(tree[2])
+		elif rule == 'gt':
+			return self.run(tree[1]) > self.run(tree[2])
+		elif rule == 'st_eq':
+			return self.run(tree[1]) <= self.run(tree[2])
+		elif rule == 'gt_eq':
+			return self.run(tree[1]) >= self.run(tree[2])
 
 		elif rule == 'negate':
 			val = self.run(tree[1])
