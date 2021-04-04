@@ -5,3 +5,4 @@ eww a + b
 eww a - b
 eww a * b
 eww a / b
+eww a % b

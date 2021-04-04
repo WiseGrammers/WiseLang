@@ -9,11 +9,11 @@ class WiseLexer(Lexer):
 	tokens = {
 		NAAM, NUMBER, STRING,
 		PRINT, INPUT, DECLARE,
-		# PASS, BREAK, IF, ELIF,
-		# ELSE, LBRAC, RBRAC,
+		PASS, BREAK, IF,
+		ELSE, LBRAC, RBRAC,
 		PLUS, SUB, MUL,
 		DIV, MOD, LPAREN,
-		RPAREN, EQ, NE
+		RPAREN, EQ, NE, NAHI
 	}
 
 
@@ -31,18 +31,20 @@ class WiseLexer(Lexer):
 	NAAM = r'[a-zA-Z_\$][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
 
-	# NAAM["agar yeh"] = ELIF
-	# NAAM["agar"] = IF
-	# NAAM["chutiya"] = PASS
+	NAAM["agar"] = IF
+	NAAM["nahi"] = ELSE
+	NAAM["nahi"] = NAHI
+	NAAM["toh"] = ELSE
+
+	NAAM["chutiya"] = PASS
 	NAAM["eww"] = PRINT
 	NAAM["input"] = INPUT
 	NAAM["WTF"] = DECLARE
-	# NAAM["hatt"] = BREAK
-	# NAAM["nahi toh"] = ELSE
+	NAAM["hatt"] = BREAK
 
 	# Operators
-	# LBRAC = r'\{'
-	# RBRAC = r'\}'
+	LBRAC = r'\{'
+	RBRAC = r'\}'
 	LPAREN = r'\('
 	RPAREN = r'\)'
 	EQ = r'=='
@@ -52,6 +54,11 @@ class WiseLexer(Lexer):
 	MUL = r'\*'
 	DIV = r'/'
 	MOD = r'%'
+
+	def remove_quotes(self, text: str):
+		if text.startswith('\"') or text.startswith('\''):
+			return text[1:-1]
+		return text
 
 	# Number token
 	@_(r'\d+')
@@ -65,6 +72,7 @@ class WiseLexer(Lexer):
 		# un-escape escaped characters
 		if len(t.value) > 0:
 			t.value = ast.literal_eval(t.value)
+		t.value = self.remove_quotes(t.value)
 		return t
 
 	def ignore_newline(self, t):
@@ -166,21 +174,23 @@ class WiseParser(Parser):
 	def expr(self, p):
 		return ('var', p.NAAM)
 
-	# @_('PASS')
-	# def statement(self, p):
-	# 	pass
+	@_('PASS')
+	def statement(self, p):
+		pass
 
-	# @_('BREAK')
-	# def statement(self, p):
-	# 	return ('break', p.BREAK)
+	@_('BREAK')
+	def statement(self, p):
+		return ('break', p.BREAK)
 
-	# @_('IF condition LBRAC statement RBRAC [ ELIF expr LBRAC statement RBRAC ] [ ELSE LBRAC RBRAC ] ')
-	# def statement(self, p):
-	# 	return ('if_stmt', p.condition, ('branch', p.statement0, p.expr0, p.statement1, p.statement2))
+	@_('IF expr LBRAC statements RBRAC [ IF NAHI expr LBRAC statements RBRAC ] [ NAHI ELSE LBRAC statements RBRAC ] ')
+	def statement(self, p):
+		return ('if-elif-else', p.expr0, p.statements0, p.expr1, p.statements1, p.statements2)
 # Parser Class End
 
 # Executor Class Start
 class Executor:
+
+	names = {}
 
 	def _NameError(self, name):
 		return f"NameError: line {self.lineno}, Variable {name} is not defined"
@@ -203,6 +213,7 @@ class Executor:
 		self.lineno = 1
 
 	def run(self, tree):
+		global names
 		if self.conf["DEBUG"]:
 			print('[DEBUG]:', tree)
 
@@ -227,7 +238,8 @@ class Executor:
 
 		elif rule == 'assign':
 			val = self.run(tree[2])
-			if val is None: return
+			if val is None:
+				return
 
 			self.env[tree[1]] = val
 			return val
@@ -299,6 +311,19 @@ class Executor:
 			if val is None:
 				return
 			return input(val)
+
+		elif rule == 'if-elif-else':
+			expr1 = self.run(tree[1])
+			expr2 = None if tree[3] is None else self.run(tree[3])
+			if expr1:
+				return self.run(tree[2])
+			elif expr2:
+				return self.run(tree[4])
+			else:
+				if tree[5]:
+					return self.run(tree[5])
+				else:
+					pass
 
 		else:
 			return print("Exception: INTERNAL ERROR!!")
