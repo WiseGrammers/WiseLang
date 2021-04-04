@@ -13,7 +13,9 @@ class WiseLexer(Lexer):
 		ELSE, LBRAC, RBRAC,
 		PLUS, SUB, MUL,
 		DIV, MOD, LPAREN,
-		RPAREN, EQ, NE, NAHI
+		RPAREN, EQ, NE,
+		ST, GT, STE,
+		GTE, EOS, NAHI
 	}
 
 
@@ -30,6 +32,7 @@ class WiseLexer(Lexer):
 	# (stored as raw strings)
 	NAAM = r'[a-zA-Z_\$][a-zA-Z0-9_]*'
 	STRING = r'\".*?\"'
+	EOS = r';'
 
 	NAAM["agar"] = IF
 	NAAM["nahi"] = ELSE
@@ -49,6 +52,10 @@ class WiseLexer(Lexer):
 	RPAREN = r'\)'
 	EQ = r'=='
 	NE = r'!='
+	STE = r'<='
+	GTE = r'>='
+	ST = r'<'
+	GT = r'>'
 	PLUS = r'\+'
 	SUB = r'-'
 	MUL = r'\*'
@@ -87,26 +94,28 @@ class WiseLexer(Lexer):
 
 # Parser Class Start
 class WiseParser(Parser):
+	debugfile = 'log.out'
 	tokens = WiseLexer.tokens
 
 	precedence = (
-		('left', EQ, NE),
+		('left', EQ, NE, ST, GT, STE, GTE),
 		('left', PLUS, SUB),
 		('left', MUL, DIV),
 		('left', MOD),
 		('right', 'UMINUS'),
-		('left', PRINT, INPUT)
+		('left', PRINT, INPUT),
+		('left', LBRAC, RBRAC, LPAREN, RPAREN)
 	)
 
 	@_('statements')
 	def main(self, p):
 		return ('main', p.statements)
 
-	@_('statement')
+	@_('statement EOS')
 	def statements(self,p):
 		return ('statements', [p.statement])
 
-	@_('statements statement')
+	@_('statements statement EOS')
 	def statements(self,p):
 		return ('statements', p.statements[1] + [p.statement])
 
@@ -157,6 +166,22 @@ class WiseParser(Parser):
 	@_('expr NE expr')
 	def expr(self, p):
 		return ('not_eq', p.expr0, p.expr1)
+
+	@_('expr ST expr')
+	def expr(self, p):
+		return ('st', p.expr0, p.expr1)
+
+	@_('expr GT expr')
+	def expr(self, p):
+		return ('gt', p.expr0, p.expr1)
+
+	@_('expr STE expr')
+	def expr(self, p):
+		return ('st_eq', p.expr0, p.expr1)
+
+	@_('expr GTE expr')
+	def expr(self, p):
+		return ('gt_eq', p.expr0, p.expr1)
 
 	@_('SUB expr %prec UMINUS')
 	def expr(self, p):
@@ -274,6 +299,14 @@ class Executor:
 			return self.run(tree[1]) == self.run(tree[2])
 		elif rule == 'not_eq':
 			return self.run(tree[1]) != self.run(tree[2])
+		elif rule == 'st':
+			return self.run(tree[1]) < self.run(tree[2])
+		elif rule == 'gt':
+			return self.run(tree[1]) > self.run(tree[2])
+		elif rule == 'st_eq':
+			return self.run(tree[1]) <= self.run(tree[2])
+		elif rule == 'gt_eq':
+			return self.run(tree[1]) >= self.run(tree[2])
 
 		elif rule == 'negate':
 			val = self.run(tree[1])
