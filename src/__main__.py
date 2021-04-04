@@ -1,5 +1,5 @@
 from classes import WiseLexer, WiseParser, Executor
-import sys, os, io, contextlib
+import sys, os
 
 # Default config
 config = {
