@@ -15,7 +15,8 @@ class WiseLexer(Lexer):
 		DIV, MOD, LPAREN,
 		RPAREN, EQ, NE,
 		ST, GT, STE,
-		GTE, EOS, NAHI
+		GTE, EOS, NAHI, JAB,
+		TAK, KARO
 	}
 
 
@@ -44,6 +45,10 @@ class WiseLexer(Lexer):
 	NAAM["input"] = INPUT
 	NAAM["WTF"] = DECLARE
 	NAAM["hatt"] = BREAK
+
+	NAAM["jab"] = JAB
+	NAAM["tak"] = TAK
+	NAAM["karo"] = KARO
 
 	# Operators
 	LBRAC = r'\{'
@@ -92,9 +97,11 @@ class WiseLexer(Lexer):
 		return t
 # Lexer Class End
 
+class Break():
+	pass
+
 # Parser Class Start
 class WiseParser(Parser):
-	debugfile = 'log.out'
 	tokens = WiseLexer.tokens
 
 	precedence = (
@@ -104,7 +111,8 @@ class WiseParser(Parser):
 		('left', MOD),
 		('right', 'UMINUS'),
 		('left', PRINT, INPUT),
-		('left', LBRAC, RBRAC, LPAREN, RPAREN)
+		('left', LBRAC, RBRAC, LPAREN, RPAREN),
+		('left', JAB, TAK, KARO)
 	)
 
 	@_('statements')
@@ -210,6 +218,10 @@ class WiseParser(Parser):
 	@_('IF expr LBRAC statements RBRAC [ IF NAHI expr LBRAC statements RBRAC ] [ NAHI ELSE LBRAC statements RBRAC ] ')
 	def statement(self, p):
 		return ('if-elif-else', p.expr0, p.statements0, p.expr1, p.statements1, p.statements2)
+
+	@_('JAB TAK expr KARO LBRAC statements RBRAC')
+	def statement(self, p):
+		return ('while', p.expr, p.statements)
 # Parser Class End
 
 # Executor Class Start
@@ -268,6 +280,9 @@ class Executor:
 
 			self.env[tree[1]] = val
 			return val
+
+		elif rule == 'break':
+			return Break()
 
 		elif rule in ('mul', 'div', 'add', 'sub', 'mod'):
 			x = self.run(tree[1])
@@ -357,6 +372,13 @@ class Executor:
 					return self.run(tree[5])
 				else:
 					pass
+
+		elif rule == 'while':
+			while self.run(tree[1]):
+				results = self.run(tree[2])
+
+			if any([isinstance(res,Break) for res in results]):
+				pass
 
 		else:
 			return print("Exception: INTERNAL ERROR!!")
