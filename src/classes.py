@@ -45,6 +45,8 @@ class WiseLexer(Lexer):
 	NAAM["input"] = INPUT
 	NAAM["WTF"] = DECLARE
 	NAAM["hatt"] = BREAK
+	# NAAM["sach"] = TRUE
+	# NAAM["jhooth"] = FALSE
 
 	NAAM["jab"] = JAB
 	NAAM["tak"] = TAK
@@ -97,8 +99,10 @@ class WiseLexer(Lexer):
 		return t
 # Lexer Class End
 
+# Break Class Start
 class Break():
 	pass
+# Break Class End
 
 # Parser Class Start
 class WiseParser(Parser):
@@ -112,7 +116,8 @@ class WiseParser(Parser):
 		('right', 'UMINUS'),
 		('left', PRINT, INPUT),
 		('left', LBRAC, RBRAC, LPAREN, RPAREN),
-		('left', JAB, TAK, KARO)
+		('left', JAB, TAK, KARO),
+		# ('left', TRUE, FALSE)
 	)
 
 	@_('statements')

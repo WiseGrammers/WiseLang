@@ -1,0 +1,6 @@
+WTF a = 10;
+
+jab tak a == 10
+karo {
+	eww "a";
+};

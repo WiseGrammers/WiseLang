@@ -1,8 +1,8 @@
-WTF a = 1
-WTF b = 20
+WTF a = 1;
+WTF b = 20;
 
-eww a + b
-eww a - b
-eww a * b
-eww a / b
-eww a % b
+eww a + b;
+eww a - b;
+eww a * b;
+eww a / b;
+eww a % b;
