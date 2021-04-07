@@ -16,23 +16,24 @@ pip install -r requirements.txt
 ## Examples:
 
 ```javascript
-// this is a comment
+// This is a comment.
+// all statents end with ;
 
-eww "hello world" // displays "hello world"
+eww "hello world"; // displays "hello world"
 
-WTF a = 10 // variable
-WTF b = 20
+WTF a = 10; // variable
+WTF b = 20;
 
 agar a == 10 { // if statement
-  eww " a is 10"
+  eww "a is 10";
 }
 
 agar nahi a != 10 {  // elif statement
-  chutiya // pass
+  chutiya; // pass
 }
 
 nahi toh { // else statement
-  chutiya
+  chutiya;
 }
 ```
 
