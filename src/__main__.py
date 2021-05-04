@@ -1,6 +1,6 @@
 from classes import WiseLexer, WiseParser, Executor
 import sys, os
-import gnureadline
+import readline
 
 # Default config
 config = {
@@ -9,10 +9,6 @@ config = {
 }
 
 VERSION = "v0.1.0 Lawda"
-up = "\033[A"
-down = "\033[B"
-left = "\033[D"
-right = "\033[C"
 
 # Execution
 if __name__ == '__main__':

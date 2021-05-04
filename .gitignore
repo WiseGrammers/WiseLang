@@ -2,4 +2,3 @@ lib/
 bin/
 __pycache__/
 pyvenv.cfg
-log.out
