@@ -16,7 +16,7 @@ class WiseLexer(Lexer):
 		RPAREN, EQ, NE,
 		ST, GT, STE,
 		GTE, EOS, NAHI, JAB,
-		TAK, KARO, TRUE, FALSE
+		TAK, KARO
 	}
 
 
@@ -45,8 +45,6 @@ class WiseLexer(Lexer):
 	NAAM["input"] = INPUT
 	NAAM["WTF"] = DECLARE
 	NAAM["hatt"] = BREAK
-	# NAAM["wise"] = TRUE
-	# NAAM["weird"] = FALSE
 
 
 	NAAM["jab"] = JAB
@@ -118,7 +116,6 @@ class WiseParser(Parser):
 		('left', PRINT, INPUT),
 		('left', LBRAC, RBRAC, LPAREN, RPAREN),
 		('left', JAB, TAK, KARO),
-		('left', TRUE, FALSE)
 	)
 
 	@_('statements')
@@ -234,8 +231,6 @@ class WiseParser(Parser):
 # Executor Class Start
 class Executor:
 
-	names = {"wise": 1, "weird": False}
-
 	def _NameError(self, name):
 		return f"NameError: line {self.lineno}, Variable {name} is not defined"
 
@@ -253,11 +248,13 @@ class Executor:
 
 	def __init__(self, env, config):
 		self.env = env
+
+		env["weird"] = 0;
+		env["wise"] = 1;
 		self.conf = config
 		self.lineno = 1
 
 	def run(self, tree):
-		global names
 		if self.conf["DEBUG"]:
 			print('[DEBUG]:', tree)
 
