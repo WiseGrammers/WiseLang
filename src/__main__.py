@@ -8,7 +8,7 @@ config = {
 	"INTERACTIVE": False
 }
 
-VERSION = "v0.1.0 Lawda"
+VERSION = "v1.0.5 Chutiya"
 
 # Execution
 if __name__ == '__main__':

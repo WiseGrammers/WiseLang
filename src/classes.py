@@ -16,7 +16,7 @@ class WiseLexer(Lexer):
 		RPAREN, EQ, NE,
 		ST, GT, STE,
 		GTE, EOS, NAHI, JAB,
-		TAK, KARO
+		TAK, KARO, TRUE, FALSE
 	}
 
 
@@ -45,8 +45,9 @@ class WiseLexer(Lexer):
 	NAAM["input"] = INPUT
 	NAAM["WTF"] = DECLARE
 	NAAM["hatt"] = BREAK
-	# NAAM["sach"] = TRUE
-	# NAAM["jhooth"] = FALSE
+	# NAAM["wise"] = TRUE
+	# NAAM["weird"] = FALSE
+
 
 	NAAM["jab"] = JAB
 	NAAM["tak"] = TAK
@@ -117,7 +118,7 @@ class WiseParser(Parser):
 		('left', PRINT, INPUT),
 		('left', LBRAC, RBRAC, LPAREN, RPAREN),
 		('left', JAB, TAK, KARO),
-		# ('left', TRUE, FALSE)
+		('left', TRUE, FALSE)
 	)
 
 	@_('statements')
@@ -214,7 +215,7 @@ class WiseParser(Parser):
 
 	@_('PASS')
 	def statement(self, p):
-		pass
+		return ('pass')
 
 	@_('BREAK')
 	def statement(self, p):
@@ -227,12 +228,13 @@ class WiseParser(Parser):
 	@_('JAB TAK expr KARO LBRAC statements RBRAC')
 	def statement(self, p):
 		return ('while', p.expr, p.statements)
+
 # Parser Class End
 
 # Executor Class Start
 class Executor:
 
-	names = {}
+	names = {"wise": 1, "weird": False}
 
 	def _NameError(self, name):
 		return f"NameError: line {self.lineno}, Variable {name} is not defined"
@@ -288,6 +290,9 @@ class Executor:
 
 		elif rule == 'break':
 			return Break()
+
+		elif rule == 'pass':
+			pass
 
 		elif rule in ('mul', 'div', 'add', 'sub', 'mod'):
 			x = self.run(tree[1])
