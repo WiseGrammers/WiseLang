@@ -3,6 +3,7 @@
 # Imports
 from sly import Lexer, Parser
 import ast
+import requests
 
 # Lexer Class Start
 class WiseLexer(Lexer):
@@ -16,7 +17,7 @@ class WiseLexer(Lexer):
 		RPAREN, EQ, NE,
 		ST, GT, STE,
 		GTE, EOS, NAHI, JAB,
-		TAK, KARO
+		TAK, KARO, FETCH
 	}
 
 
@@ -50,6 +51,8 @@ class WiseLexer(Lexer):
 	NAAM["jab"] = JAB
 	NAAM["tak"] = TAK
 	NAAM["karo"] = KARO
+
+	NAAM["pakag"] = FETCH
 
 	# Operators
 	LBRAC = r'\{'
@@ -116,6 +119,7 @@ class WiseParser(Parser):
 		('left', PRINT, INPUT),
 		('left', LBRAC, RBRAC, LPAREN, RPAREN),
 		('left', JAB, TAK, KARO),
+		('left', FETCH)
 	)
 
 	@_('statements')
@@ -226,10 +230,21 @@ class WiseParser(Parser):
 	def statement(self, p):
 		return ('while', p.expr, p.statements)
 
+	@_('FETCH expr')
+	def statement(self, p):
+		return ('fetch', p.expr)
+
 # Parser Class End
 
 # Executor Class Start
 class Executor:
+
+	def check(res, res2):
+		if res2 is True:
+			res2 = "wise"
+		elif res2 is False:
+			res2 = "weird"
+		return str(res2)
 
 	def _NameError(self, name):
 		return f"NameError: line {self.lineno}, Variable {name} is not defined"
@@ -318,17 +333,17 @@ class Executor:
 				return print(self._OperationError(op, self._type(x), self._type(y)))
 
 		elif rule == 'eq':
-			return self.run(tree[1]) == self.run(tree[2])
+			return self.check(self.run(tree[1]) == self.run(tree[2]))
 		elif rule == 'not_eq':
-			return self.run(tree[1]) != self.run(tree[2])
+			return self.check(self.run(tree[1]) != self.run(tree[2]))
 		elif rule == 'st':
-			return self.run(tree[1]) < self.run(tree[2])
+			return self.check(self.run(tree[1]) < self.run(tree[2]))
 		elif rule == 'gt':
-			return self.run(tree[1]) > self.run(tree[2])
+			return self.check(self.run(tree[1]) > self.run(tree[2]))
 		elif rule == 'st_eq':
-			return self.run(tree[1]) <= self.run(tree[2])
+			return self.check(self.run(tree[1]) <= self.run(tree[2]))
 		elif rule == 'gt_eq':
-			return self.run(tree[1]) >= self.run(tree[2])
+			return self.check(self.run(tree[1]) >= self.run(tree[2]))
 
 		elif rule == 'negate':
 			val = self.run(tree[1])
@@ -386,6 +401,9 @@ class Executor:
 
 			if any([isinstance(res,Break) for res in results]):
 				pass
+
+		elif rule == 'fetch':
+			response = requests.get(tree[1][1])
 
 		else:
 			return print("Exception: INTERNAL ERROR!!")

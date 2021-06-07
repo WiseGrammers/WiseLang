@@ -1,6 +1,7 @@
 from classes import WiseLexer, WiseParser, Executor
 import sys, os
-import readline
+if os.name != "nt":
+	import readline
 
 # Default config
 config = {
