@@ -1,5 +1,4 @@
 # WiseLang
-<img align="center" src="https://camo.githubusercontent.com/3b71db46d3d3ad7db85c642945318877155caabea4b993539b018d0cd90cc6ad/68747470733a2f2f63646e2e646973636f72646170702e636f6d2f6174746163686d656e74732f3639343532333436313535363736343638322f3832373831313135303438353532303431342f66696e616c776973652e706e67">
 
 ## A Wise language, for wise members of AUI
 
@@ -7,7 +6,7 @@ we've created this lannguage for our beloved AUIians to learn how to code and be
 
 ## Requirements
 
-this language uses sly for parsing and lexical analysis
+This language uses sly for parsing and lexical analysis
 
 ```bash
 pip install -r requirements.txt
@@ -29,11 +28,11 @@ agar a == 10 { // if statement
 }
 
 agar nahi a != 10 {  // elif statement
-  chutiya; // pass
+  c***iya; // pass (yes, it's real)
 }
 
 nahi toh { // else statement
-  chutiya;
+  c***iya;
 }
 ```
 
