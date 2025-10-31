@@ -1,58 +1,112 @@
 # WiseLang
 
-## A Wise language, for wise members of AUI
+WiseLang is an esoteric, compiler-based programming language inspired by Python, designed for unique computational experiments and exploration of novel programming paradigms.
 
-we've created this lannguage for our beloved AUIians to learn how to code and become the next chintu!
+## Overview
+
+WiseLang was developed to provide an innovative approach to programming language design, combining familiar Python-like syntax with experimental features. It includes a custom compiler and core language functionalities to support such exploration.
+
+## Features
+
+- Python-inspired, easy-to-read syntax.
+- Compiler-based implementation for efficient execution.
+- Support for fundamental programming constructs with unique syntax.
+- Designed for learning, experimentation, and language theory research.
+
 
 ## Requirements
 
-This language uses sly for parsing and lexical analysis
+WiseLang uses the `sly` library for lexical analysis and parsing. Install necessary dependencies with:
 
-```bash
+```
 pip install -r requirements.txt
 ```
 
-## Examples:
 
-```javascript
-// This is a comment.
-// all statents end with ;
+## Basic Syntax Examples
 
-eww "hello world"; // displays "hello world"
+### Hello, World
 
-WTF a = 10; // variable
-WTF b = 20;
+```
+// Comment lines start with //
 
-agar a == 10 { // if statement
-  eww "a is 10";
+eww "Hello, World!";  // Prints Hello, World!
+```
+
+
+### Variables
+
+```
+WTF a = 10;
+WTF b = "variable";
+```
+
+*Note: Variable names are case-sensitive (e.g., `A` ≠ `a`).*
+
+### Conditional Statements
+
+```
+WTF a = 10;
+agar a == 10 {
+    eww "a is 10";
 }
-
-agar nahi a != 10 {  // elif statement
-  c***iya; // pass (yes, it's real)
-}
-
-nahi toh { // else statement
-  c***iya;
+nahi toh {
+    eww "a is not 10";
 }
 ```
 
-You can find additional Information/Documentation about the project on our [Wiki](https://github.com/Sakon13/WiseLang/wiki "WiseLang Wiki")
 
+### Control Statements
 
-## Running the program
-
-use this to run wiselang interpreter in normal mode
-```bash
-python src [file] 
 ```
+// Comments
+c***iya; // acts as a pass or no-op statement
+hatt;    // break or exit from a block
+```
+
+
+## Operators
+
+### Comparison Operators
+
+| Operator | Description | Example |
+| :-- | :-- | :-- |
+| == | Equal to | x == y; |
+| != | Not equal to | x != y; |
+| > | Greater than | x > y; |
+| >= | Greater than or equal to | x >= y; |
+| < | Less than | x < y; |
+| <= | Less than or equal to | x <= y; |
+
+### Arithmetic Operators
+
+| Operator | Description | Example |
+| :-- | :-- | :-- |
+| + | Addition | x + y; |
+| - | Subtraction | x - y; |
+| * | Multiplication | x * y; |
+| / | Division | x / y; |
+| % | Modulus (remainder) | x % y; |
+
+## Running the Interpreter
+
+Run the WiseLang interpreter in standard mode:
+
+```
+python src [file]
+```
+
 
 ### Debug Mode
 
-you can turn on debug mode with '-d' switch
-(even though it is useless for end users for me its very useful)
+Activate debug mode (for development or troubleshooting) with the `-d` flag:
 
-```bash
+```
 python src -d [file]
 ```
 
-<footer>you can provide a file or else run the interpreter in interactive mode</footer>
+If no file is provided, the interpreter starts in interactive mode.
+
+## Additional Information
+
+Comprehensive documentation is maintained in the project Wiki for reference on language features and usage.
